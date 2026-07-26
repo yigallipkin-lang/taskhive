@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#F59E0B">
+    <meta name="description" content="TaskHive - Modern task management for professionals">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tasks Hive">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23F59E0B' width='180' height='180'/><text x='50%' y='50%' font-size='90' text-anchor='middle' dominant-baseline='middle'>🐝</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23F59E0B' width='100' height='100'/><text x='50%' y='50%' font-size='60' text-anchor='middle' dominant-baseline='middle'>🐝</text></svg>">
+    <title>TaskHive</title>
+    <style>
+        :root {
+            /* Color Palette */
+            --honey: #F59E0B;
+            --honey-light: #FFFBEB;
+            --honey-mid: #FDE68A;
+            --honey-d: #D97706;
+            --honey-deep: #92400E;
+            --comb-dark: #1A1200;
+            --comb-mid: #2D1A0A;
+            --card: #FFFFFF;
+            --tx: #111827;
+            --mu: #6B7280;
+            --red: #DC2626;
+            --grn: #16A34A;
+            --blu: #2563EB;
+
+            /* Spacing Scale (8px base) */
+            --sp-xs: 4px;
+            --sp-sm: 8px;
+            --sp-md: 16px;
+            --sp-lg: 24px;
+            --sp-xl: 32px;
+            --sp-2xl: 48px;
+
+            /* Typography */
+            --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+
+            /* Transitions */
+            --duration-fast: 150ms;
+            --duration-normal: 250ms;
+            --duration-slow: 350ms;
+            --easing: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--tx);
+            background: var(--honey-light);
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Smooth scrolling with momentum */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .scroll-container {
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scroll-padding-top: var(--sp-lg);
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: var(--honey-d);
+            border-radius: 4px;
+            opacity: 0.6;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            opacity: 1;
+        }
+
+        @media (pointer: coarse) {
+            .scroll-container::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        /* App Shell Layout */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            background: var(--honey-light);
+        }
+
+        /* Top Navigation */
+        .nav-top {
+            background: var(--comb-dark);
+            color: white;
+            padding: max(var(--sp-md), env(safe-area-inset-top)) var(--sp-md) var(--sp-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+        }
+
+        .nav-top h1 {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--sp-sm);
+        }
+
+        .nav-top-actions {
+            display: flex;
+            gap: var(--sp-sm);
+            align-items: center;
+        }
+
+        /* Account Bar */
+        .account-bar {
+            background: var(--comb-mid);
+            color: white;
+            padding: var(--sp-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            gap: var(--sp-sm);
+            flex-shrink: 0;
+        }
+
+        .account-bar::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .account-chip {
+            padding: var(--sp-xs) var(--sp-md);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing);
+            flex-shrink: 0;
+        }
+
+        .account-chip:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .account-chip.active {
+            background: var(--honey);
+            color: var(--honey-deep);
+            border-color: var(--honey);
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid #E5E7EB;
+            width: 64px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--sp-md) 0;
+            gap: var(--sp-md);
+        }
+
+        .sidebar-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--mu);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all var(--duration-fast) var(--easing);
+        }
+
+        .sidebar-btn:hover {
+            background: var(--honey-light);
+            color: var(--honey-d);
+        }
+
+        .sidebar-btn.active {
+            background: var(--honey);
+            color: white;
+            border-color: var(--honey-d);
+        }
+
+        .main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .view-header {
+            padding: var(--sp-lg) var(--sp-md);
+            border-bottom: 1px solid #E5E7EB;
+            flex-shrink: 0;
+        }
+
+        .view-header h2 {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: var(--sp-sm);
+        }
+
+        .view-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: var(--sp-lg);
+        }
+
+        /* Card Components */
+        .card {
+            background: var(--card);
+            border: 1px solid #FCD34D;
+            border-radius: 10px;
+            padding: var(--sp-md);
+            margin-bottom: var(--sp-md);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--duration-fast) var(--easing);
+        }
+
+        .card:hover {
+            border-color: var(--honey);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: var(--sp-md);
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--tx);
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: var(--mu);
+            margin-top: var(--sp-xs);
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: var(--sp-sm) var(--sp-md);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing);
+            font-family: var(--font-body);
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--sp-xs);
+            white-space: nowrap;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: var(--honey);
+            color: var(--honey-deep);
+            border-color: var(--honey-d);
+        }
+
+        .btn-primary:hover {
+            background: var(--honey-d);
+            color: white;
+        }
+
+        .btn-ghost {
+            background: var(--honey-light);
+            color: var(--honey-d);
+            border-color: #FCD34D;
+        }
+
+        .btn-ghost:hover {
+            background: var(--honey-mid);
+        }
+
+        .btn-danger {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--red);
+            border-color: rgba(220, 38, 38, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 38, 38, 0.2);
+        }
+
+        /* Input Styles */
+        input, textarea, select {
+            font-family: var(--font-body);
+            font-size: 14px;
+            padding: var(--sp-sm) var(--sp-md);
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            color: var(--tx);
+            background: white;
+            transition: all var(--duration-fast) var(--easing);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--honey);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: fadeIn var(--duration-normal) var(--easing);
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 14px;
+            padding: var(--sp-lg);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp var(--duration-normal) var(--easing);
+        }
+
+        @media (max-width: 600px) {
+            .modal {
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-height: 80vh;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--sp-2xl) var(--sp-lg);
+            color: var(--mu);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: var(--sp-md);
+            opacity: 0.6;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--tx);
+            margin-bottom: var(--sp-sm);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 56px;
+                padding: var(--sp-sm) 0;
+                gap: var(--sp-sm);
+            }
+
+            .sidebar-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .view-header {
+                padding: var(--sp-md);
+            }
+
+            .view-content {
+                padding: var(--sp-md);
+            }
+
+            .card {
+                padding: var(--sp-md);
+                margin-bottom: var(--sp-md);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-top {
+                padding: max(var(--sp-sm), env(safe-area-inset-top)) var(--sp-sm) var(--sp-sm);
+            }
+
+            .nav-top h1 {
+                font-size: 18px;
+            }
+
+            .sidebar {
+                width: 48px;
+            }
+
+            .account-bar {
+                padding: var(--sp-sm);
+            }
+
+            .view-content {
+                padding: var(--sp-md);
+            }
+
+            .card {
+                border-radius: 8px;
+            }
+
+            .modal {
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .nav-top, .sidebar, .account-bar {
+                display: none;
+            }
+
+            body {
+                background: white;
+            }
+
+            .card {
+                page-break-inside: avoid;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <nav class="nav-top">
+            <h1>🐝 TaskHive</h1>
+            <div class="nav-top-actions">
+                <button class="btn btn-ghost" id="addBtn">+ New Task</button>
+            </div>
+        </nav>
+
+        <div class="account-bar" id="accountBar">
+            <div class="account-chip active" data-account="all">All</div>
+        </div>
+
+        <div class="content">
+            <aside class="sidebar">
+                <button class="sidebar-btn active" data-view="kanban" title="Kanban">📊</button>
+                <button class="sidebar-btn" data-view="table" title="Table">📋</button>
+                <button class="sidebar-btn" data-view="today" title="Today">📅</button>
+                <button class="sidebar-btn" data-view="urgent" title="Urgent">🔴</button>
+                <button class="sidebar-btn" data-view="archive" title="Archive">📦</button>
+            </aside>
+
+            <main class="main-view">
+                <div class="view-header">
+                    <h2 id="viewTitle">Kanban View</h2>
+                </div>
+                <div class="view-content scroll-container" id="viewContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎯</div>
+                        <h3>No tasks yet</h3>
+                        <p>Create your first task to get started</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for creating/editing tasks -->
+    <div class="modal-backdrop" id="taskModal">
+        <div class="modal">
+            <h2 style="font-family: var(--font-heading); margin-bottom: var(--sp-md);">New Task</h2>
+            <form id="taskForm" style="display: flex; flex-direction: column; gap: var(--sp-md);">
+                <input type="text" id="taskTitle" placeholder="Task title" required>
+                <textarea id="taskNotes" placeholder="Notes (optional)" rows="3"></textarea>
+                <select id="taskProject">
+                    <option value="">Select project</option>
+                </select>
+                <input type="date" id="taskDue">
+                <select id="taskPriority">
+                    <option value="normal">Normal Priority</option>
+                    <option value="high">High Priority</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+                <div style="display: flex; gap: var(--sp-sm); justify-content: flex-end;">
+                    <button type="button" class="btn btn-ghost" id="cancelTaskBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        const app = {
+            state: {
+                accounts: [],
+                projects: [],
+                tasks: [],
+                currentView: 'kanban',
+                selectedAccount: 'all'
+            },
+
+            // Initialize app
+            init() {
+                this.loadData();
+                this.setupEventListeners();
+                this.render();
+            },
+
+            // Load data from localStorage
+            loadData() {
+                const saved = localStorage.getItem('th_v1');
+                if (saved) {
+                    this.state = JSON.parse(saved);
+                } else {
+                    this.createSampleData();
+                }
+            },
+
+            // Save data to localStorage
+            saveData() {
+                localStorage.setItem('th_v1', JSON.stringify(this.state));
+            },
+
+            // Create sample data
+            createSampleData() {
+                this.state.accounts = [
+                    { id: '1', name: 'Client A', color: '#F59E0B' },
+                    { id: '2', name: 'Client B', color: '#D97706' }
+                ];
+                this.state.projects = [
+                    { id: 'p1', name: 'Website Redesign', accountId: '1', color: '#F59E0B' },
+                    { id: 'p2', name: 'Mobile App', accountId: '2', color: '#D97706' }
+                ];
+                this.state.tasks = [
+                    {
+                        id: 't1',
+                        title: 'Design homepage',
+                        projectId: 'p1',
+                        due: '2026-08-15',
+                        priority: 'high',
+                        done: false,
+                        flags: []
+                    },
+                    {
+                        id: 't2',
+                        title: 'Setup database',
+                        projectId: 'p2',
+                        due: '2026-08-10',
+                        priority: 'urgent',
+                        done: false,
+                        flags: []
+                    }
+                ];
+                this.saveData();
+            },
+
+            // Setup event listeners
+            setupEventListeners() {
+                // View switching
+                document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.state.currentView = e.target.dataset.view;
+                        document.getElementById('viewTitle').textContent = this.getViewTitle();
+                        this.render();
+                    });
+                });
+
+                // Add task button
+                document.getElementById('addBtn').addEventListener('click', () => {
+                    document.getElementById('taskModal').classList.add('active');
+                });
+
+                // Task form
+                document.getElementById('taskForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addTask({
+                        title: document.getElementById('taskTitle').value,
+                        projectId: document.getElementById('taskProject').value,
+                        due: document.getElementById('taskDue').value,
+                        priority: document.getElementById('taskPriority').value,
+                        notes: document.getElementById('taskNotes').value
+                    });
+                    document.getElementById('taskModal').classList.remove('active');
+                    document.getElementById('taskForm').reset();
+                });
+
+                // Close modal
+                document.getElementById('cancelTaskBtn').addEventListener('click', () => {
+                    document.getElementById('taskModal').classList.remove('active');
+                    document.getElementById('taskForm').reset();
+                });
+
+                // Account filtering
+                document.querySelectorAll('.account-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        document.querySelectorAll('.account-chip').forEach(c => c.classList.remove('active'));
+                        chip.classList.add('active');
+                        this.state.selectedAccount = chip.dataset.account;
+                        this.render();
+                    });
+                });
+            },
+
+            // Add task
+            addTask(taskData) {
+                const task = {
+                    id: 't' + Date.now(),
+                    title: taskData.title,
+                    projectId: taskData.projectId || this.state.projects[0]?.id,
+                    due: taskData.due,
+                    priority: taskData.priority,
+                    notes: taskData.notes || '',
+                    done: false,
+                    flags: [],
+                    subs: []
+                };
+                this.state.tasks.push(task);
+                this.saveData();
+                this.render();
+            },
+
+            // Get view title
+            getViewTitle() {
+                const views = {
+                    kanban: 'Kanban View',
+                    table: 'Table View',
+                    today: 'Today',
+                    urgent: 'Urgent Tasks',
+                    archive: 'Archive'
+                };
+                return views[this.state.currentView] || 'Tasks';
+            },
+
+            // Render view
+            render() {
+                const content = document.getElementById('viewContent');
+                const tasks = this.getFilteredTasks();
+
+                if (tasks.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎯</div>
+                            <h3>No tasks</h3>
+                            <p>Create your first task to get started</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (this.state.currentView === 'kanban') {
+                    this.renderKanban(content, tasks);
+                } else if (this.state.currentView === 'table') {
+                    this.renderTable(content, tasks);
+                } else {
+                    this.renderTaskList(content, tasks);
+                }
+
+                this.setupTaskListeners();
+            },
+
+            // Get filtered tasks
+            getFilteredTasks() {
+                let filtered = this.state.tasks;
+
+                if (this.state.selectedAccount !== 'all') {
+                    const accountProjects = this.state.projects
+                        .filter(p => p.accountId === this.state.selectedAccount)
+                        .map(p => p.id);
+                    filtered = filtered.filter(t => accountProjects.includes(t.projectId));
+                }
+
+                if (this.state.currentView === 'today') {
+                    const today = new Date().toISOString().split('T')[0];
+                    filtered = filtered.filter(t => t.due === today && !t.done);
+                }
+
+                if (this.state.currentView === 'urgent') {
+                    filtered = filtered.filter(t => t.priority === 'urgent' && !t.done);
+                }
+
+                if (this.state.currentView === 'archive') {
+                    filtered = filtered.filter(t => t.done);
+                } else {
+                    filtered = filtered.filter(t => !t.done);
+                }
+
+                return filtered;
+            },
+
+            // Render Kanban view
+            renderKanban(container, tasks) {
+                const projectMap = new Map();
+                tasks.forEach(task => {
+                    if (!projectMap.has(task.projectId)) {
+                        projectMap.set(task.projectId, []);
+                    }
+                    projectMap.get(task.projectId).push(task);
+                });
+
+                let html = '<div style="display: flex; gap: var(--sp-lg); overflow-x: auto; -webkit-overflow-scrolling: touch;">';
+                projectMap.forEach((tasks, projectId) => {
+                    const project = this.state.projects.find(p => p.id === projectId);
+                    if (project) {
+                        html += `
+                            <div style="flex-shrink: 0; min-width: 320px;">
+                                <div style="background: white; border-radius: 10px; padding: var(--sp-md); border: 1px solid #E5E7EB;">
+                                    <h3 style="font-family: var(--font-heading); font-weight: 600; margin-bottom: var(--sp-md); color: var(--tx);">${project.name}</h3>
+                                    <div style="display: flex; flex-direction: column; gap: var(--sp-sm);">
+                                        ${tasks.map(task => `
+                                            <div class="card" data-task-id="${task.id}" style="cursor: pointer;">
+                                                <div style="display: flex; align-items: flex-start; gap: var(--sp-sm);">
+                                                    <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} style="margin-top: 4px; cursor: pointer;">
+                                                    <div style="flex: 1;">
+                                                        <div class="card-title">${task.title}</div>
+                                                        ${task.due ? `<div class="card-meta">Due: ${new Date(task.due).toLocaleDateString()}</div>` : ''}
+                                                        <div class="card-meta" style="display: flex; gap: var(--sp-xs); margin-top: var(--sp-xs);">
+                                                            <span style="background: ${task.priority === 'urgent' ? 'var(--red)' : task.priority === 'high' ? 'var(--honey)' : '#9CA3AF'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">
+                                                                ${task.priority}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            },
+
+            // Render Table view
+            renderTable(container, tasks) {
+                const html = `
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                        <thead>
+                            <tr style="background: var(--honey-light);">
+                                <th style="padding: var(--sp-md); text-align: left; font-weight: 600; color: var(--tx); border-bottom: 1px solid #E5E7EB;">Task</th>
+                                <th style="padding: var(--sp-md); text-align: left; font-weight: 600; color: var(--tx); border-bottom: 1px solid #E5E7EB;">Project</th>
+                                <th style="padding: var(--sp-md); text-align: left; font-weight: 600; color: var(--tx); border-bottom: 1px solid #E5E7EB;">Due</th>
+                                <th style="padding: var(--sp-md); text-align: left; font-weight: 600; color: var(--tx); border-bottom: 1px solid #E5E7EB;">Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tasks.map(task => {
+                                const project = this.state.projects.find(p => p.id === task.projectId);
+                                return `
+                                    <tr style="border-bottom: 1px solid #E5E7EB;" class="task-row" data-task-id="${task.id}">
+                                        <td style="padding: var(--sp-md);"><input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} style="margin-right: var(--sp-sm); cursor: pointer;"><span style="text-decoration: ${task.done ? 'line-through' : 'none'};">${task.title}</span></td>
+                                        <td style="padding: var(--sp-md);">${project?.name || 'Unknown'}</td>
+                                        <td style="padding: var(--sp-md);">${task.due ? new Date(task.due).toLocaleDateString() : '—'}</td>
+                                        <td style="padding: var(--sp-md);"><span style="background: ${task.priority === 'urgent' ? 'var(--red)' : task.priority === 'high' ? 'var(--honey)' : '#9CA3AF'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${task.priority}</span></td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+                container.innerHTML = html;
+            },
+
+            // Render simple task list
+            renderTaskList(container, tasks) {
+                const html = tasks.map(task => {
+                    const project = this.state.projects.find(p => p.id === task.projectId);
+                    return `
+                        <div class="card" data-task-id="${task.id}">
+                            <div style="display: flex; gap: var(--sp-sm); align-items: flex-start;">
+                                <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} style="margin-top: 4px; cursor: pointer; min-width: 20px;">
+                                <div style="flex: 1;">
+                                    <div class="card-title">${task.title}</div>
+                                    <div class="card-meta">${project?.name || 'Unknown Project'}</div>
+                                    ${task.due ? `<div class="card-meta">Due: ${new Date(task.due).toLocaleDateString()}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                container.innerHTML = html;
+            },
+
+            // Setup task listeners
+            setupTaskListeners() {
+                document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const taskId = e.target.closest('[data-task-id]')?.dataset.taskId;
+                        const task = this.state.tasks.find(t => t.id === taskId);
+                        if (task) {
+                            task.done = e.target.checked;
+                            this.saveData();
+                            this.render();
+                        }
+                    });
+                });
+            }
+        };
+
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => app.init());
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                console.log('Service Worker registration failed (offline mode)');
+            });
+        }
+    </script>
+</body>
+</html>
