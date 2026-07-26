@@ -246,17 +246,25 @@
   // Realtime Database sync for Topics Data
   if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbOnValue){
     const topicsRef = window.dbRef(window.rtdb, 'upcomingTopicsData');
+    console.log('🔥 Setting up Topics Firebase listener...');
     window.dbOnValue(topicsRef, (snapshot) => {
+      console.log('📱 Topics listener fired, exists:', snapshot.exists());
       if(snapshot.exists()){
         const data = snapshot.val();
+        console.log('📱 Topics raw data:', data);
         // Convert object to array if needed
         window.upcomingTopicsData = Array.isArray(data) ? data : (data ? Object.values(data) : []);
         console.log('📱 Firebase Topics Data synced:', window.upcomingTopicsData.length, 'topics');
         if(window.render) window.render();
+      } else {
+        console.log('📱 Topics snapshot does not exist in Firebase');
+        window.upcomingTopicsData = [];
       }
     }, (error) => {
-      console.warn('⚠ Topics data listener error:', error.message);
+      console.error('⚠ Topics data listener error:', error.message, error);
     });
+  } else {
+    console.warn('⚠ Firebase not ready for topics listener:', {firebaseInitialized: window.firebaseInitialized, rtdb: !!window.rtdb, dbRef: !!window.dbRef, dbOnValue: !!window.dbOnValue});
   }
 </script>
 
