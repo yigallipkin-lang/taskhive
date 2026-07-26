@@ -7984,19 +7984,19 @@ window.exportRepairData=exportRepairData;
 
 // Default topics data
 const DEFAULT_TOPICS_DATA = [];
-// Initialize upcoming topics data
-if(!window.upcomingTopicsData || window.upcomingTopicsData.length === 0){
-  try{
-    const saved = localStorage.getItem('upcomingTopicsData');
-    window.upcomingTopicsData = saved ? JSON.parse(saved) : [];
-  }catch(e){
-    console.warn('Could not parse topics data from localStorage:', e.message);
+// Initialize upcoming topics data from localStorage or Firebase
+try{
+  const saved = localStorage.getItem('upcomingTopicsData');
+  if(saved) {
+    window.upcomingTopicsData = JSON.parse(saved);
+    console.log('✓ Loaded topics from localStorage:', window.upcomingTopicsData.length, 'items');
+  } else {
     window.upcomingTopicsData = [];
   }
+}catch(e){
+  console.warn('Could not parse topics data from localStorage:', e.message);
+  window.upcomingTopicsData = [];
 }
-
-// Get reference to topics data (always use window property)
-const getTopicsData = () => window.upcomingTopicsData || [];
 
 // Save topics to localStorage and Firebase
 function saveTopicsData(){
