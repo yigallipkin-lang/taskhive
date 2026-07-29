@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.11.6">
+<meta name="version" content="1.11.7">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -245,31 +245,34 @@
     });
   }
 
-  // Realtime Database sync for Topics Data
+  // Realtime Database sync for Topics Data with fallback
   if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbOnValue){
     const topicsRef = window.dbRef(window.rtdb, 'upcomingTopicsData');
     console.log('🔥 Setting up Topics Firebase listener...');
-    window.dbOnValue(topicsRef, (snapshot) => {
-      console.log('📱 Topics listener fired, exists:', snapshot.exists());
-      if(snapshot.exists()){
-        const data = snapshot.val();
-        console.log('📱 Topics raw data:', data);
-        // Convert object to array if needed
-        window.upcomingTopicsData = Array.isArray(data) ? data : (data ? Object.values(data) : []);
-        console.log('📱 Firebase Topics Data synced:', window.upcomingTopicsData.length, 'topics');
-        // Update localStorage so all instances stay in sync
-        localStorage.setItem('upcomingTopicsData', JSON.stringify(window.upcomingTopicsData));
-        if(window.render) window.render();
-      } else {
-        console.log('📱 Topics snapshot does not exist in Firebase');
-        window.upcomingTopicsData = [];
-        localStorage.setItem('upcomingTopicsData', JSON.stringify([]));
-      }
-    }, (error) => {
-      console.error('⚠ Topics data listener error:', error.message, error);
-    });
+    try {
+      window.dbOnValue(topicsRef, (snapshot) => {
+        console.log('📱 Topics listener fired, exists:', snapshot.exists());
+        if(snapshot.exists()){
+          const data = snapshot.val();
+          console.log('📱 Topics raw data:', data);
+          window.upcomingTopicsData = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+          console.log('📱 Firebase Topics Data synced:', window.upcomingTopicsData.length, 'topics');
+          localStorage.setItem('upcomingTopicsData', JSON.stringify(window.upcomingTopicsData));
+          if(window.render && !window.topicsCellEditing) window.render();
+        } else {
+          console.log('📱 Topics snapshot empty in Firebase');
+          if(!window.upcomingTopicsData || window.upcomingTopicsData.length === 0) {
+            window.upcomingTopicsData = [];
+          }
+        }
+      }, (error) => {
+        console.error('⚠ Topics listener error:', error.code, error.message);
+      });
+    } catch(e) {
+      console.error('❌ Topics listener setup failed:', e.message);
+    }
   } else {
-    console.warn('⚠ Firebase not ready for topics listener:', {firebaseInitialized: window.firebaseInitialized, rtdb: !!window.rtdb, dbRef: !!window.dbRef, dbOnValue: !!window.dbOnValue});
+    console.warn('⚠ Firebase not ready:', {fb: window.firebaseInitialized, rtdb: !!window.rtdb});
   }
 </script>
 
@@ -6477,16 +6480,28 @@ function toggleSubtaskDone(taskId, subId){
 // QUICK ADD HANDLERS
 // ═══════════════════════════════════════════════════════════════════════════════
 function quickAddFromInput(input){
-  const raw = input.value.trim(); if(!raw) return;
-  const projId = input.dataset.qaProj||null;
-  const parsed = parseQuickAdd(raw, projId);
-  if(!parsed.title) return;
-  const task = {id:uid(),done:false,createdAt:new Date().toISOString(),...parsed};
-  state.tasks.push(task);
-  sv();
-  syncTaskToFirebase(task);
-  input.value='';
-  render();
+  try {
+    const raw = input.value.trim();
+    if(!raw) return;
+    const projId = input.dataset.qaProj||null;
+    console.log('🚀 Quick add:', raw, 'to project:', projId);
+    const parsed = parseQuickAdd(raw, projId);
+    if(!parsed.title) {
+      console.warn('⚠ Quick add parse failed');
+      return;
+    }
+    const task = {id:uid(),done:false,createdAt:new Date().toISOString(),...parsed};
+    state.tasks.push(task);
+    console.log('✓ Task added to state:', task.title);
+    sv();
+    syncTaskToFirebase(task);
+    input.value='';
+    console.log('✓ Rendering...');
+    render();
+    console.log('✓ Quick add complete');
+  } catch(e) {
+    console.error('❌ Quick add error:', e.message, e.stack);
+  }
 }
 function quickAddFromInputNear(btn){
   const input = btn.previousElementSibling;
