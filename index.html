@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.11.7">
+<meta name="version" content="1.11.8">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -8026,15 +8026,41 @@ window.exportRepairData=exportRepairData;
 
 // Default topics data
 const DEFAULT_TOPICS_DATA = [];
-// Load from localStorage as temporary fallback until Firebase fires
+// Load from localStorage as temporary fallback
 try{
   const saved = localStorage.getItem('upcomingTopicsData');
   window.upcomingTopicsData = saved ? JSON.parse(saved) : [];
-  if(saved) console.log('✓ Topics loaded from localStorage (fallback):', window.upcomingTopicsData.length, 'items');
+  if(saved) console.log('✓ Topics loaded from localStorage:', window.upcomingTopicsData.length, 'items');
 }catch(e){
   window.upcomingTopicsData = [];
   console.warn('Could not load topics from localStorage:', e.message);
 }
+
+// Fetch latest topics from Firebase on initialization (fallback for dead listeners)
+window.fetchTopicsFromFirebase = async function(){
+  if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) {
+    console.log('⏳ Firebase not ready yet for topics fetch');
+    return;
+  }
+  try {
+    console.log('🔄 Fetching topics from Firebase...');
+    const snapshot = await window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'));
+    if(snapshot.exists()){
+      const data = snapshot.val();
+      const fbTopics = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+      console.log('✅ Fetched from Firebase:', fbTopics.length, 'topics');
+      if(fbTopics.length > (window.upcomingTopicsData?.length || 0)){
+        window.upcomingTopicsData = fbTopics;
+        localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
+        console.log('✓ Updated from Firebase (more data)', fbTopics.length);
+      }
+    }
+  } catch(e) {
+    console.log('⚠ Topics Firebase fetch skipped:', e.message?.substring(0, 50));
+  }
+};
+// Fetch on init after brief delay to let Firebase initialize
+setTimeout(window.fetchTopicsFromFirebase, 2000);
 
 // Save topics to localStorage and Firebase with merge logic
 function saveTopicsData(){
