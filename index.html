@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.11.2">
+<meta name="version" content="1.11.3">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -236,6 +236,8 @@
       if(snapshot.exists()){
         window.repairStatusData = snapshot.val();
         console.log('📱 Firebase Repair Data synced:', window.repairStatusData.length, 'records');
+        // Update localStorage so all instances stay in sync
+        localStorage.setItem('repairStatusData', JSON.stringify(window.repairStatusData));
         if(window.render) window.render();
       }
     }, (error) => {
@@ -255,10 +257,13 @@
         // Convert object to array if needed
         window.upcomingTopicsData = Array.isArray(data) ? data : (data ? Object.values(data) : []);
         console.log('📱 Firebase Topics Data synced:', window.upcomingTopicsData.length, 'topics');
+        // Update localStorage so all instances stay in sync
+        localStorage.setItem('upcomingTopicsData', JSON.stringify(window.upcomingTopicsData));
         if(window.render) window.render();
       } else {
         console.log('📱 Topics snapshot does not exist in Firebase');
         window.upcomingTopicsData = [];
+        localStorage.setItem('upcomingTopicsData', JSON.stringify([]));
       }
     }, (error) => {
       console.error('⚠ Topics data listener error:', error.message, error);
@@ -1704,9 +1709,16 @@ function load(){
   if(!state.view) state.view='kanban';
   if(!state.collapsed) state.collapsed={accounts:{},projects:{},tasks:{}};
 
-  // Repair data will be loaded from Firebase listener - start empty
-  window.repairStatusData = [];
-  console.log('✓ Repair data initialized - waiting for Firebase sync...');
+  // Load repair status data from localStorage
+  try{
+    const savedRepair=localStorage.getItem('repairStatusData');
+    if(savedRepair){
+      window.repairStatusData=JSON.parse(savedRepair);
+      console.log('✓ Loaded repair data from localStorage: '+window.repairStatusData.length+' records');
+    }
+  }catch(e){
+    console.warn('⚠️ Could not load repair data, using defaults:', e.message);
+  }
 
   // CRITICAL FIX: Only initialize projectInfo if it doesn't exist at all
   // Don't reset arrays to [] because that interferes with Firebase merge logic
@@ -7702,8 +7714,15 @@ const DEFAULT_REPAIR_DATA = [
 ];
 
 // Initialize repairStatusData from localStorage or use defaults
-// Start with empty repair data - Firebase listener will populate it
-let repairStatusData = [];
+let repairStatusData = (() => {
+  try{
+    const saved = localStorage.getItem('repairStatusData');
+    if(saved) return JSON.parse(saved);
+  }catch(e){
+    console.warn('Could not parse repair data from localStorage:', e.message);
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_REPAIR_DATA)); // Deep copy defaults
+})();
 
 // Save repair data to localStorage and Firebase
 function saveRepairData(){
@@ -7968,10 +7987,21 @@ window.exportRepairData=exportRepairData;
 // UPCOMING TOPICS TABLE - v1.0
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Default topics data - start empty, let Firebase listener populate it
+// Default topics data
 const DEFAULT_TOPICS_DATA = [];
-window.upcomingTopicsData = [];
-console.log('✓ Topics initialized - waiting for Firebase sync...');
+// Initialize upcoming topics data from localStorage as fallback
+try{
+  const saved = localStorage.getItem('upcomingTopicsData');
+  if(saved) {
+    window.upcomingTopicsData = JSON.parse(saved);
+    console.log('✓ Loaded topics from localStorage:', window.upcomingTopicsData.length, 'items');
+  } else {
+    window.upcomingTopicsData = [];
+  }
+}catch(e){
+  console.warn('Could not parse topics data from localStorage:', e.message);
+  window.upcomingTopicsData = [];
+}
 
 // Save topics to localStorage and Firebase
 function saveTopicsData(){
