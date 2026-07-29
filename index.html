@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.12.0">
+<meta name="version" content="1.12.1">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -281,25 +281,34 @@
 
     // Fetch from Firebase every 10 seconds
     setInterval(async function(){
-      if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) return;
+      if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) {
+        console.log('⏭️ [SYNC] Firebase not ready, skipping periodic check');
+        return;
+      }
       try {
         const snapshot = await window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'));
+        const localTopics = window.upcomingTopicsData || [];
+
         if(snapshot.exists()){
           const fbData = snapshot.val();
           const fbTopics = Array.isArray(fbData) ? fbData : (fbData ? Object.values(fbData) : []);
-          const localTopics = window.upcomingTopicsData || [];
+          console.log('🔄 [SYNC CHECK] Firebase:', fbTopics.length, 'Local:', localTopics.length);
 
           // Update if Firebase data is different
           if(fbTopics.length !== localTopics.length ||
              JSON.stringify(fbTopics) !== JSON.stringify(localTopics)){
-            console.log('🔄 [SYNC] Topics changed: Firebase has', fbTopics.length, 'vs local', localTopics.length);
+            console.log('🔄 [SYNC] Topics CHANGED - updating from Firebase');
             window.upcomingTopicsData = fbTopics;
             localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
             if(window.render && !window.topicsCellEditing) window.render();
+          } else {
+            console.log('✓ [SYNC] Topics already in sync');
           }
+        } else {
+          console.log('📭 [SYNC] Firebase data is empty');
         }
       } catch(e) {
-        // Silent fail - this is just a fallback
+        console.error('❌ [SYNC] Error:', e.message?.substring(0,50));
       }
     }, 10000);
 
