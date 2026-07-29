@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.11.9">
+<meta name="version" content="1.12.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -274,6 +274,58 @@
   } else {
     console.warn('⚠ Firebase not ready:', {fb: window.firebaseInitialized, rtdb: !!window.rtdb});
   }
+
+  // ✅ CRITICAL FIX: Periodic Topics sync to handle listener failures
+  window.setupTopicsSyncFallback = function(){
+    console.log('🔄 Setting up periodic Topics Firebase sync (10s interval)...');
+
+    // Fetch from Firebase every 10 seconds
+    setInterval(async function(){
+      if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) return;
+      try {
+        const snapshot = await window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'));
+        if(snapshot.exists()){
+          const fbData = snapshot.val();
+          const fbTopics = Array.isArray(fbData) ? fbData : (fbData ? Object.values(fbData) : []);
+          const localTopics = window.upcomingTopicsData || [];
+
+          // Update if Firebase data is different
+          if(fbTopics.length !== localTopics.length ||
+             JSON.stringify(fbTopics) !== JSON.stringify(localTopics)){
+            console.log('🔄 [SYNC] Topics changed: Firebase has', fbTopics.length, 'vs local', localTopics.length);
+            window.upcomingTopicsData = fbTopics;
+            localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
+            if(window.render && !window.topicsCellEditing) window.render();
+          }
+        }
+      } catch(e) {
+        // Silent fail - this is just a fallback
+      }
+    }, 10000);
+
+    // Force sync when page becomes visible
+    document.addEventListener('visibilitychange', async function(){
+      if(!document.hidden){
+        console.log('👁️ Page visible - forcing Topics sync from Firebase');
+        if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) return;
+        try {
+          const snapshot = await window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'));
+          if(snapshot.exists()){
+            const fbData = snapshot.val();
+            const fbTopics = Array.isArray(fbData) ? fbData : (fbData ? Object.values(fbData) : []);
+            window.upcomingTopicsData = fbTopics;
+            localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
+            if(window.render && !window.topicsCellEditing) window.render();
+          }
+        } catch(e) {
+          console.warn('⚠ Visibility sync failed:', e.message?.substring(0,40));
+        }
+      }
+    });
+  };
+
+  // Start sync fallback after short delay to ensure Firebase is ready
+  setTimeout(window.setupTopicsSyncFallback, 500);
 </script>
 
 <!-- CSV Import (hidden - accessible via console or settings) -->
@@ -8028,11 +8080,10 @@ window.fetchTopicsFromFirebase = async function(){
       const data = snapshot.val();
       const fbTopics = Array.isArray(data) ? data : (data ? Object.values(data) : []);
       console.log('✅ Fetched from Firebase:', fbTopics.length, 'topics');
-      if(fbTopics.length > (window.upcomingTopicsData?.length || 0)){
-        window.upcomingTopicsData = fbTopics;
-        localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
-        console.log('✓ Updated from Firebase (more data)', fbTopics.length);
-      }
+      // Always update from Firebase - it's the source of truth
+      window.upcomingTopicsData = fbTopics;
+      localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
+      console.log('✓ Topics synced from Firebase:', fbTopics.length, 'items');
     }
   } catch(e) {
     console.log('⚠ Topics Firebase fetch skipped:', e.message?.substring(0, 50));
