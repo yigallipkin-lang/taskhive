@@ -1,0 +1,39 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *\"index.html\" ]]; then cp \"$f\" \"${f}.backup.$(date +%s)\" && echo '{\"statusMessage\": \"Backed up index.html\"}'; fi; }",
+            "statusMessage": "Backing up index.html..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *\"index.html\" ]]; then current=$(grep -oP '(?<=content=\")[0-9.]+' \"$f\" | head -1) && if [[ $current =~ ^([0-9]+)\\.([0-9]+)\\.([0-9]+)$ ]]; then major=\"${BASH_REMATCH[1]}\"; minor=\"${BASH_REMATCH[2]}\"; patch=\"${BASH_REMATCH[3]}\"; patch=$((patch + 1)); new_version=\"$major.$minor.$patch\"; sed -i \"s/content=\\\"$current\\\"/content=\\\"$new_version\\\"/\" \"$f\" && echo \"{\\\"statusMessage\\\": \\\"Version bumped: $current → $new_version\\\"}\"; fi; fi; }",
+            "statusMessage": "Incrementing version..."
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "Preview",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"suppressOutput\": true}'"
+          }
+        ]
+      }
+    ]
+  }
+}

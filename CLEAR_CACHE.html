@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TaskHive - Clear Cache</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+    <h1>🗑️ TaskHive Cache Clearer</h1>
+    <p>Click the button below to completely clear all caches and service workers:</p>
+    
+    <button id="clearBtn" style="padding: 12px 24px; font-size: 16px; background: #FF9800; color: white; border: none; border-radius: 6px; cursor: pointer;">
+        Clear All Cache & Unregister Service Workers
+    </button>
+    
+    <div id="status" style="margin-top: 20px; padding: 12px; background: #f5f5f5; border-radius: 6px; display: none;"></div>
+    
+    <script>
+        document.getElementById('clearBtn').addEventListener('click', async () => {
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.innerHTML = '⏳ Clearing cache...';
+            
+            try {
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                
+                // Clear all caches
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+                
+                // Unregister all service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map(reg => reg.unregister()));
+                }
+                
+                status.innerHTML = `
+                    <strong style="color: #10b981;">✓ Cache cleared successfully!</strong><br><br>
+                    • Cleared ${cacheNames.length} cache(s)<br>
+                    • LocalStorage cleared<br>
+                    • SessionStorage cleared<br>
+                    • Service Workers unregistered<br><br>
+                    <a href="index.html" style="color: #FF9800; text-decoration: none; font-weight: bold;">→ Go back to TaskHive</a>
+                `;
+                
+                console.log('✓ All caches cleared. Version will update on next load.');
+                
+                // Force a page refresh after 1 second
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch(err) {
+                status.innerHTML = `<strong style="color: #ef4444;">✗ Error:</strong> ${err.message}`;
+                console.error('Error clearing cache:', err);
+            }
+        });
+    </script>
+</body>
+</html>

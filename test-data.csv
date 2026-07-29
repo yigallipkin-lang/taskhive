@@ -1,0 +1,43 @@
+### ACCOUNTS ###
+id,name,color,order
+acct-001,Test Account 1,#FF6B6B,0
+acct-002,Test Account 2,#4ECDC4,1
+acct-003,Test Account 3,#45B7D1,2
+
+### PROJECTS ###
+id,name,accountId,color,description,startDate,endDate,order
+proj-001,Project Alpha,acct-001,#FFE66D,Test project for account 1,2026-01-01,2026-03-31,0
+proj-002,Project Beta,acct-001,#95E1D3,Second project for account 1,2026-02-01,2026-04-30,1
+proj-003,Project Gamma,acct-002,#F38181,Test project for account 2,2026-01-15,2026-05-15,0
+proj-004,Project Delta,acct-003,#AA96DA,Test project for account 3,2026-02-15,2026-06-15,0
+
+### TASKS ###
+id,title,projectId,due,priority,urgent,followup,today,done,recurring,notes,subs,order,hidden,createdAt
+task-001,Design mockups,proj-001,2026-02-28,high,1,0,1,0,,Create initial mockups,[],0,0,2026-01-20T10:00:00Z
+task-002,Review feedback,proj-001,2026-03-15,medium,0,1,0,0,,Review client feedback,[],1,0,2026-01-21T10:00:00Z
+task-003,Implementation,proj-002,2026-03-31,high,0,0,0,0,,Start implementation,[{"id":"sub-001","title":"Setup environment","done":false},{"id":"sub-002","title":"Initialize repo","done":true}],0,0,2026-01-22T10:00:00Z
+task-004,Testing,proj-002,2026-04-15,medium,0,0,1,0,,Complete testing,[],1,0,2026-01-23T10:00:00Z
+task-005,Documentation,proj-003,2026-04-30,low,0,0,0,1,,Write documentation,[],0,0,2026-01-24T10:00:00Z
+task-006,Deployment,proj-003,2026-05-15,high,1,1,0,0,,Deploy to production,[],1,0,2026-01-25T10:00:00Z
+task-007,Budget Review,proj-004,2026-03-31,medium,0,0,0,0,,Review project budget,[],0,1,2026-01-26T10:00:00Z
+
+### PROJECT_INFO ###
+projectId,contractId,programPN,programNo,productPN,lnContractNo,safetyResp,projStartDate,projEndDate,description,clin,pca,configuration,infoBlocks
+proj-001,CNT-001,PN-2024-001,PROG-001,PROD-001,LNC-001,John Smith,2026-01-01,2026-03-31,Alpha project with test configuration,[],[],"[{""id"":""cfg-001"",""lruPN"":""LRU-001"",""lruDesc"":""Test LRU"",""remarks"":""Initial config""}]",[]
+proj-002,CNT-002,PN-2024-002,PROG-002,PROD-002,LNC-002,Jane Doe,2026-02-01,2026-04-30,Beta project with advanced features,[],[],"[{""id"":""cfg-002"",""lruPN"":""LRU-002"",""lruDesc"":""Advanced LRU"",""remarks"":""Enhanced config""}]",[]
+proj-003,CNT-003,PN-2024-003,PROG-003,PROD-003,LNC-003,Bob Wilson,2026-01-15,2026-05-15,Gamma project with CLIN data,"[{""id"":""clin-001"",""clinNo"":""CLIN-001"",""clinDesc"":""First CLIN""}]","[{""id"":""pca-001"",""pcaNo"":""PCA-001"",""pcaDesc"":""First PCA""}]",[],[]
+proj-004,CNT-004,PN-2024-004,PROG-004,PROD-004,LNC-004,Alice Brown,2026-02-15,2026-06-15,Delta project with all fields,[],[],"[{""id"":""cfg-003"",""lruPN"":""LRU-003"",""lruDesc"":""Complex LRU"",""remarks"":""Full config""}]",[]
+
+### PROJECT_BUDGET_SCHEDULE ###
+projectId,budget,spent,scheduleStatus,upcomingActivities,milestones,budgetCurrency
+proj-001,50000,35000,on-track,"[{""id"":""act-001"",""title"":""Design Review"",""date"":""2026-02-15"",""status"":""completed""},{""id"":""act-002"",""title"":""Mockup Presentation"",""date"":""2026-02-28"",""status"":""in-progress""}]","[{""id"":""m-001"",""title"":""Design Phase Complete"",""date"":""2026-03-01"",""status"":""pending""}]",USD
+proj-002,75000,42000,at-risk,"[{""id"":""act-003"",""title"":""Code Review"",""date"":""2026-03-10"",""status"":""pending""}]","[{""id"":""m-002"",""title"":""Development Complete"",""date"":""2026-03-31"",""status"":""at-risk""}]",USD
+proj-003,100000,65000,on-track,"[{""id"":""act-004"",""title"":""Testing"",""date"":""2026-04-01"",""status"":""pending""}]","[{""id"":""m-003"",""title"":""Testing Complete"",""date"":""2026-04-30"",""status"":""pending""}]",USD
+proj-004,120000,0,delayed,"[]","[{""id"":""m-004"",""title"":""Project Kickoff"",""date"":""2026-03-01"",""status"":""delayed""}]",USD
+
+### APP_SETTINGS ###
+key,value
+budgetCurrency,USD
+projectTab,general
+collapsed,"{""accounts"":{""acct-001"":false},""projects":{},""tasks:{}}"
+flt,"{""u"":false,""f"":false,""t"":false,""s"":false}"

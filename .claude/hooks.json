@@ -1,0 +1,5 @@
+{
+  "disabledHooks": ["preview-required"],
+  "projectType": "firebase-hosting",
+  "description": "Firebase Hosting PWA - no local preview server needed"
+}

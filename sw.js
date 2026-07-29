@@ -1,0 +1,101 @@
+const SW_VERSION = 'v1036'; // NUCLEAR option: Maximum cache invalidation - unregister all old SWs
+const CACHE_NAME = `taskhive-cache-${SW_VERSION}`;
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap'
+];
+
+// Install: pre-cache core assets
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)).catch(() => {})
+  );
+  self.skipWaiting(); // Activate immediately, don't wait for old tabs to close
+});
+
+// Activate: delete ALL old caches
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim()) // Take control of all open tabs immediately
+  );
+});
+
+// Fetch: network-first for app files, cache-first for fonts/CDN
+self.addEventListener('fetch', e => {
+  const url = e.request.url;
+
+  // Always bypass cache for Firebase and external APIs (network-first)
+  if (url.includes('firebaseapp.com') || url.includes('gstatic.com/firebasejs') ||
+      url.includes('firestore.googleapis.com') || url.includes('identitytoolkit.googleapis.com')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  // Skip caching for POST/PUT/DELETE requests (API calls)
+  if (e.request.method !== 'GET') {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  // Cache-first for Google Fonts (they're versioned/immutable)
+  if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com')) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(r => {
+          if (r && r.status === 200) {
+            const clone = r.clone();
+            caches.open(CACHE_NAME).then(c => c.put(e.request, clone)).catch(() => {});
+          }
+          return r;
+        }).catch(() => caches.match(e.request));
+      })
+    );
+    return;
+  }
+
+  // Cache-first for CDN libraries (unpkg, cdn.jsdelivr — versioned URLs)
+  if (url.includes('unpkg.com') || url.includes('cdn.jsdelivr.net')) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(r => {
+          if (r && r.status === 200) {
+            const clone = r.clone();
+            caches.open(CACHE_NAME).then(c => c.put(e.request, clone)).catch(() => {});
+          }
+          return r;
+        });
+      })
+    );
+    return;
+  }
+
+  // Network-first for all app files (index.html, manifest, etc.)
+  // This ensures updates are picked up immediately when online
+  e.respondWith(
+    fetch(e.request).then(r => {
+      if (r && r.status === 200 && r.type !== 'opaque') {
+        const clone = r.clone();
+        caches.open(CACHE_NAME).then(c => c.put(e.request, clone)).catch(() => {});
+      }
+      return r;
+    }).catch(() => {
+      // Offline fallback: serve from cache
+      return caches.match(e.request).then(cached => {
+        return cached || caches.match('./index.html');
+      });
+    })
+  );
+});
+
+// Listen for skip-waiting message from the app
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});

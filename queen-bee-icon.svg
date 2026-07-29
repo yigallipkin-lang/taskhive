@@ -1,0 +1,41 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="250" fill="#FFFFFF" stroke="#F97316" stroke-width="8"/>
+
+  <!-- Crown -->
+  <g id="crown">
+    <path d="M 150 280 L 150 220 L 200 250 L 256 180 L 312 250 L 362 220 L 362 280 Z" fill="#FBBF24" stroke="#F97316" stroke-width="4"/>
+    <circle cx="150" cy="220" r="18" fill="#FCD34D" stroke="#F97316" stroke-width="2"/>
+    <circle cx="256" cy="180" r="18" fill="#FCD34D" stroke="#F97316" stroke-width="2"/>
+    <circle cx="362" cy="220" r="18" fill="#FCD34D" stroke="#F97316" stroke-width="2"/>
+  </g>
+
+  <!-- Wings -->
+  <ellipse cx="120" cy="320" rx="60" ry="80" fill="rgba(255,255,255,0.85)" stroke="#D1D5DB" stroke-width="3" transform="rotate(-25 120 320)"/>
+  <ellipse cx="392" cy="320" rx="60" ry="80" fill="rgba(255,255,255,0.85)" stroke="#D1D5DB" stroke-width="3" transform="rotate(25 392 320)"/>
+
+  <!-- Lower wings -->
+  <ellipse cx="140" cy="380" rx="40" ry="55" fill="rgba(255,255,255,0.6)" stroke="#D1D5DB" stroke-width="2" transform="rotate(-20 140 380)"/>
+  <ellipse cx="372" cy="380" rx="40" ry="55" fill="rgba(255,255,255,0.6)" stroke="#D1D5DB" stroke-width="2" transform="rotate(20 372 380)"/>
+
+  <!-- Body -->
+  <ellipse cx="256" cy="360" rx="70" ry="100" fill="#92400E" stroke="#6B2D0C" stroke-width="3"/>
+
+  <!-- Stripes -->
+  <path d="M 200 340 Q 256 320 312 340 Q 256 355 200 360Z" fill="#FBBF24" stroke="none"/>
+  <path d="M 200 380 Q 256 360 312 380 Q 256 400 200 400Z" fill="#FBBF24" stroke="none"/>
+  <path d="M 210 420 Q 256 400 302 420 Q 256 435 210 440Z" fill="#FBBF24" stroke="none"/>
+
+  <!-- Head -->
+  <circle cx="256" cy="280" r="50" fill="#92400E" stroke="#6B2D0C" stroke-width="3"/>
+
+  <!-- Eyes -->
+  <circle cx="235" cy="270" r="10" fill="#FBBF24" stroke="none"/>
+  <circle cx="277" cy="270" r="10" fill="#FBBF24" stroke="none"/>
+
+  <!-- Antennae -->
+  <path d="M 235 230 Q 210 180 190 150" stroke="#6B2D0C" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M 277 230 Q 302 180 322 150" stroke="#6B2D0C" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="190" cy="150" r="12" fill="#FBBF24" stroke="#F97316" stroke-width="2"/>
+  <circle cx="322" cy="150" r="12" fill="#FBBF24" stroke="#F97316" stroke-width="2"/>
+</svg>
