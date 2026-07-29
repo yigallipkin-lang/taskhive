@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.11.3">
+<meta name="version" content="1.11.4">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -7724,17 +7724,40 @@ let repairStatusData = (() => {
   return JSON.parse(JSON.stringify(DEFAULT_REPAIR_DATA)); // Deep copy defaults
 })();
 
-// Save repair data to localStorage and Firebase
+// Save repair data to localStorage and Firebase with merge logic
 function saveRepairData(){
   try{
     localStorage.setItem('repairStatusData', JSON.stringify(repairStatusData));
     console.log('✓ Repair data saved to localStorage');
 
-    // Sync to Firebase Realtime Database
-    if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet){
-      window.dbSet(window.dbRef(window.rtdb, 'repairStatusData'), repairStatusData)
-        .then(() => console.log('✓ Repair data synced to Firebase'))
-        .catch(e => console.warn('⚠ Firebase sync failed:', e.message));
+    // Sync to Firebase with merge to prevent data conflicts
+    if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet && window.dbGet){
+      // Get latest Firebase data and merge
+      window.dbGet(window.dbRef(window.rtdb, 'repairStatusData'))
+        .then((snapshot) => {
+          let firebaseData = snapshot.exists() ? snapshot.val() : [];
+          if(!Array.isArray(firebaseData)) firebaseData = firebaseData ? Object.values(firebaseData) : [];
+
+          // Merge: create a map of all records by ID, prefer local edits over Firebase
+          const idMap = {};
+          firebaseData.forEach(item => {
+            if(item && item.id) idMap[item.id] = item;
+          });
+          repairStatusData.forEach(item => {
+            if(item && item.id) idMap[item.id] = item;
+          });
+
+          // Save merged data
+          const merged = Object.values(idMap);
+          window.dbSet(window.dbRef(window.rtdb, 'repairStatusData'), merged)
+            .then(() => console.log('✓ Repair merged & synced:', merged.length, 'records'))
+            .catch(e => console.warn('⚠ Firebase merge failed:', e.message));
+        })
+        .catch(e => {
+          console.warn('⚠ Firebase fetch failed, saving local only:', e.message);
+          window.dbSet(window.dbRef(window.rtdb, 'repairStatusData'), repairStatusData)
+            .catch(e2 => console.warn('⚠ Firebase sync failed:', e2.message));
+        });
     }
   }catch(e){
     console.error('Error saving repair data:', e.message);
@@ -8003,18 +8026,41 @@ try{
   window.upcomingTopicsData = [];
 }
 
-// Save topics to localStorage and Firebase
+// Save topics to localStorage and Firebase with merge logic
 function saveTopicsData(){
   try{
-    const data = window.upcomingTopicsData || [];
-    localStorage.setItem('upcomingTopicsData', JSON.stringify(data));
+    const localData = window.upcomingTopicsData || [];
+    localStorage.setItem('upcomingTopicsData', JSON.stringify(localData));
     console.log('✓ Topics data saved to localStorage');
 
-    // Sync to Firebase Realtime Database
-    if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet){
-      window.dbSet(window.dbRef(window.rtdb, 'upcomingTopicsData'), data)
-        .then(() => console.log('✓ Topics data synced to Firebase'))
-        .catch(e => console.warn('⚠ Firebase sync failed:', e.message));
+    // Sync to Firebase with merge to prevent data conflicts
+    if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet && window.dbGet){
+      // Get latest Firebase data and merge
+      window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'))
+        .then((snapshot) => {
+          let firebaseData = snapshot.exists() ? snapshot.val() : [];
+          if(!Array.isArray(firebaseData)) firebaseData = firebaseData ? Object.values(firebaseData) : [];
+
+          // Merge: create a map of all topics by ID, prefer local edits over Firebase
+          const idMap = {};
+          firebaseData.forEach(item => {
+            if(item && item.id) idMap[item.id] = item;
+          });
+          localData.forEach(item => {
+            if(item && item.id) idMap[item.id] = item;
+          });
+
+          // Save merged data
+          const merged = Object.values(idMap);
+          window.dbSet(window.dbRef(window.rtdb, 'upcomingTopicsData'), merged)
+            .then(() => console.log('✓ Topics merged & synced:', merged.length, 'items'))
+            .catch(e => console.warn('⚠ Firebase merge failed:', e.message));
+        })
+        .catch(e => {
+          console.warn('⚠ Firebase fetch failed, saving local only:', e.message);
+          window.dbSet(window.dbRef(window.rtdb, 'upcomingTopicsData'), localData)
+            .catch(e2 => console.warn('⚠ Firebase sync failed:', e2.message));
+        });
     }
   }catch(e){
     console.error('Error saving topics data:', e.message);
