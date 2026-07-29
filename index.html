@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.11.4">
+<meta name="version" content="1.11.5">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -1709,16 +1709,9 @@ function load(){
   if(!state.view) state.view='kanban';
   if(!state.collapsed) state.collapsed={accounts:{},projects:{},tasks:{}};
 
-  // Load repair status data from localStorage
-  try{
-    const savedRepair=localStorage.getItem('repairStatusData');
-    if(savedRepair){
-      window.repairStatusData=JSON.parse(savedRepair);
-      console.log('✓ Loaded repair data from localStorage: '+window.repairStatusData.length+' records');
-    }
-  }catch(e){
-    console.warn('⚠️ Could not load repair data, using defaults:', e.message);
-  }
+  // Repair data will load from Firebase - start empty
+  window.repairStatusData = [];
+  console.log('✓ Repair data starting empty - waiting for Firebase...');
 
   // CRITICAL FIX: Only initialize projectInfo if it doesn't exist at all
   // Don't reset arrays to [] because that interferes with Firebase merge logic
@@ -7713,16 +7706,8 @@ const DEFAULT_REPAIR_DATA = [
   {id:'r12',program:'SPECTRO LRPA',customer:'ELBIT - Aerospace',location:'Philippines',progNo:'P162',partNo:'4360-1000-J0',serialNo:'2111',reason:'VNIRZ, MWIRZ in-flight comm loss',warranty:'YES',paidRepair:'NO',ilsMgr:'Koby Philosof',repairStart:'TBD',deliveryCommit:'',plannedFinish:'',actualFinish:''}
 ];
 
-// Initialize repairStatusData from localStorage or use defaults
-let repairStatusData = (() => {
-  try{
-    const saved = localStorage.getItem('repairStatusData');
-    if(saved) return JSON.parse(saved);
-  }catch(e){
-    console.warn('Could not parse repair data from localStorage:', e.message);
-  }
-  return JSON.parse(JSON.stringify(DEFAULT_REPAIR_DATA)); // Deep copy defaults
-})();
+// Start repair data empty - Firebase listener will populate
+let repairStatusData = [];
 
 // Save repair data to localStorage and Firebase with merge logic
 function saveRepairData(){
@@ -8010,21 +7995,10 @@ window.exportRepairData=exportRepairData;
 // UPCOMING TOPICS TABLE - v1.0
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Default topics data
+// Default topics data - START EMPTY, Firebase listener will populate
 const DEFAULT_TOPICS_DATA = [];
-// Initialize upcoming topics data from localStorage as fallback
-try{
-  const saved = localStorage.getItem('upcomingTopicsData');
-  if(saved) {
-    window.upcomingTopicsData = JSON.parse(saved);
-    console.log('✓ Loaded topics from localStorage:', window.upcomingTopicsData.length, 'items');
-  } else {
-    window.upcomingTopicsData = [];
-  }
-}catch(e){
-  console.warn('Could not parse topics data from localStorage:', e.message);
-  window.upcomingTopicsData = [];
-}
+window.upcomingTopicsData = [];
+console.log('✓ Topics data starting empty - waiting for Firebase...');
 
 // Save topics to localStorage and Firebase with merge logic
 function saveTopicsData(){
