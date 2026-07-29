@@ -8100,12 +8100,31 @@ function saveTopicsData(){
     console.log('✓ Topics saved to localStorage:', data.length, 'items');
 
     // Direct sync to Firebase without merge (simpler, more reliable)
-    if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet){
-      window.dbSet(window.dbRef(window.rtdb, 'upcomingTopicsData'), data)
-        .then(() => console.log('✅ Topics synced to Firebase:', data.length, 'items'))
-        .catch(e => console.error('❌ Firebase write failed:', e.code, e.message));
+    const fbReady = window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet;
+    console.log('🔍 Firebase ready check:', {
+      initialized: window.firebaseInitialized,
+      rtdb: !!window.rtdb,
+      dbRef: !!window.dbRef,
+      dbSet: !!window.dbSet,
+      ready: fbReady
+    });
+
+    if(fbReady){
+      try {
+        const ref = window.dbRef(window.rtdb, 'upcomingTopicsData');
+        console.log('📤 Attempting Firebase write with', data.length, 'items...');
+        window.dbSet(ref, data)
+          .then(() => {
+            console.log('✅ Topics synced to Firebase:', data.length, 'items');
+          })
+          .catch(e => {
+            console.error('❌ Firebase write failed:', e.code, e.message);
+          });
+      } catch(refError) {
+        console.error('❌ Firebase ref/set error:', refError.message);
+      }
     } else {
-      console.warn('⚠ Firebase not ready for write');
+      console.warn('⚠ Firebase not ready for write', {initialized: window.firebaseInitialized, rtdb: !!window.rtdb});
     }
   }catch(e){
     console.error('Error saving topics data:', e.message);
