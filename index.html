@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.12.4">
+<meta name="version" content="1.12.5">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -8129,6 +8129,36 @@ window.fetchTopicsFromFirebase = async function(){
 };
 // Fetch on init after brief delay to let Firebase initialize
 setTimeout(window.fetchTopicsFromFirebase, 2000);
+
+// Set up real-time listener for topics
+window.topicsListenerUnsubscribe = null;
+function setupTopicsListener(){
+  if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbOnValue) {
+    console.log('⏳ Firebase not ready for topics listener');
+    return;
+  }
+  try {
+    console.log('🔥 Setting up real-time topics listener...');
+    const ref = window.dbRef(window.rtdb, 'upcomingTopicsData');
+    window.topicsListenerUnsubscribe = window.dbOnValue(ref, (snapshot) => {
+      if(snapshot.exists()){
+        const data = snapshot.val();
+        const fbTopics = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+        window.upcomingTopicsData = fbTopics;
+        localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
+        console.log('📱 Topics real-time sync:', fbTopics.length, 'items');
+        render();
+      }
+    }, (error) => {
+      console.error('❌ Topics listener error:', error.message);
+    });
+    console.log('✅ Topics listener ready');
+  } catch(e) {
+    console.error('❌ Topics listener setup error:', e.message);
+  }
+}
+// Start listener after Firebase initializes
+setTimeout(setupTopicsListener, 2500);
 
 // Save topics to localStorage and Firebase
 function saveTopicsData(){
