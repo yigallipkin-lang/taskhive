@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.12.3">
+<meta name="version" content="1.12.4">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -1914,12 +1914,29 @@ function loadCloudCfg(){
 }
 
 async function syncTaskToFirebase(task){
-  if(!window.db || !window.setDoc || !window.doc) return; // Firebase not initialized
+  console.log('  [syncTaskToFirebase] Starting...');
+  if(!window.db) {
+    console.error('  ❌ window.db not available');
+    return;
+  }
+  if(!window.setDoc) {
+    console.error('  ❌ window.setDoc not available');
+    return;
+  }
+  if(!window.doc) {
+    console.error('  ❌ window.doc not available');
+    return;
+  }
+  console.log('  ✓ All Firebase functions available');
   try{
-    await window.setDoc(window.doc(window.db, 'tasks', task.id), task, { merge: true });
-    console.log(`✓ Synced task to Firestore: ${task.title.substring(0,30)}`);
+    console.log(`  [syncTaskToFirebase] Writing task: ${task.title}`);
+    const docRef = window.doc(window.db, 'tasks', task.id);
+    console.log('  [syncTaskToFirebase] Doc reference created:', task.id);
+    await window.setDoc(docRef, task, { merge: true });
+    console.log(`  ✓✓ Synced task to Firestore: ${task.title.substring(0,30)}`);
   }catch(error){
-    console.error('❌ Firestore sync error:', error.message);
+    console.error('  ❌❌ Firestore sync error:', error.message);
+    console.error('  Stack:', error.stack);
   }
 }
 
@@ -6539,25 +6556,39 @@ function toggleSubtaskDone(taskId, subId){
 // QUICK ADD HANDLERS
 // ═══════════════════════════════════════════════════════════════════════════════
 function quickAddFromInput(input){
+  console.log('=== QUICK ADD START ===');
   try {
     const raw = input.value.trim();
-    if(!raw) return;
+    console.log('1️⃣ Input value:', raw);
+    if(!raw) {
+      console.log('Ⓘ Input empty, returning');
+      return;
+    }
     const projId = input.dataset.qaProj||null;
-    console.log('🚀 Quick add:', raw, 'to project:', projId);
+    console.log('2️⃣ Project ID:', projId);
     const parsed = parseQuickAdd(raw, projId);
+    console.log('3️⃣ Parsed task:', JSON.stringify(parsed).substring(0,100));
     if(!parsed.title) {
       console.warn('⚠ Quick add parse failed');
       return;
     }
     const task = {id:uid(),done:false,createdAt:new Date().toISOString(),...parsed};
+    console.log('4️⃣ Full task object:', JSON.stringify(task).substring(0,150));
     state.tasks.push(task);
-    console.log('✓ Task added to state:', task.title);
+    console.log('5️⃣ Task pushed to state.tasks, length:', state.tasks.length);
     sv();
-    syncTaskToFirebase(task);
+    console.log('6️⃣ Saved to localStorage');
+    console.log('7️⃣ Calling syncTaskToFirebase...');
+    console.log('   - window.db available:', !!window.db);
+    console.log('   - window.setDoc available:', !!window.setDoc);
+    console.log('   - window.doc available:', !!window.doc);
+    const syncPromise = syncTaskToFirebase(task);
+    console.log('8️⃣ syncTaskToFirebase returned:', syncPromise);
     input.value='';
-    console.log('✓ Rendering...');
+    console.log('9️⃣ Cleared input value');
     render();
-    console.log('✓ Quick add complete');
+    console.log('🔟 Rendered UI');
+    console.log('✓ Quick add complete\n');
   } catch(e) {
     console.error('❌ Quick add error:', e.message, e.stack);
   }
