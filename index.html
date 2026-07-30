@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.12.1">
+<meta name="version" content="1.12.2">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -3432,6 +3432,8 @@ function setupKanbanScrolling(){
 
   container.addEventListener('mousedown', (e) => {
     if(e.button !== 0) return; // Left click only
+    // Don't grab if clicking on quick add input or button
+    if(e.target.closest('.col-add') || e.target.closest('input[data-qa-proj]') || e.target.closest('.col-add-btn')) return;
     isDown = true;
     startX = e.pageX - container.offsetLeft;
     scrollLeft = container.scrollLeft;
