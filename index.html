@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.12.2">
+<meta name="version" content="1.12.3">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -62,7 +62,7 @@
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import {
-    getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, addDoc
+    getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc, addDoc
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import {
     getStorage, ref, uploadBytes
@@ -116,6 +116,7 @@
     window.onSnapshot = onSnapshot;
     window.doc = doc;
     window.setDoc = setDoc;
+    window.deleteDoc = deleteDoc;
     window.updateDoc = updateDoc;
     window.addDoc = addDoc;
 
@@ -1913,23 +1914,21 @@ function loadCloudCfg(){
 }
 
 async function syncTaskToFirebase(task){
-  if(!window.db) return; // Firebase not initialized
+  if(!window.db || !window.setDoc || !window.doc) return; // Firebase not initialized
   try{
-    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    await setDoc(doc(window.db, 'tasks', task.id), task, { merge: true });
-    console.log(`✓ Synced task: ${task.title.substring(0,30)}`);
+    await window.setDoc(window.doc(window.db, 'tasks', task.id), task, { merge: true });
+    console.log(`✓ Synced task to Firestore: ${task.title.substring(0,30)}`);
   }catch(error){
     console.error('❌ Firestore sync error:', error.message);
   }
 }
 
 async function syncAllTasksToFirebase(){
-  if(!window.db) return;
+  if(!window.db || !window.setDoc || !window.doc) return;
   try{
-    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
     let syncCount = 0;
     for(const task of state.tasks){
-      await setDoc(doc(window.db, 'tasks', task.id), task, { merge: true });
+      await window.setDoc(window.doc(window.db, 'tasks', task.id), task, { merge: true });
       syncCount++;
     }
     console.log(`✓ Synced ${syncCount} tasks to Firestore`);
@@ -1939,10 +1938,9 @@ async function syncAllTasksToFirebase(){
 }
 
 async function deleteTaskFromFirebase(taskId){
-  if(!window.db) return;
+  if(!window.db || !window.deleteDoc || !window.doc) return;
   try{
-    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    await deleteDoc(doc(window.db, 'tasks', taskId));
+    await window.deleteDoc(window.doc(window.db, 'tasks', taskId));
     console.log(`✓ Deleted from Firestore: ${taskId}`);
   }catch(error){
     console.error('❌ Firestore delete error:', error.message);
@@ -1950,10 +1948,9 @@ async function deleteTaskFromFirebase(taskId){
 }
 
 async function deleteProjectFromFirebase(projectId){
-  if(!window.db) return;
+  if(!window.db || !window.deleteDoc || !window.doc) return;
   try{
-    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    await deleteDoc(doc(window.db, 'projects', projectId));
+    await window.deleteDoc(window.doc(window.db, 'projects', projectId));
     console.log(`✓ Deleted project from Firestore: ${projectId}`);
   }catch(error){
     console.error('❌ Firestore project delete error:', error.message);
@@ -1961,10 +1958,9 @@ async function deleteProjectFromFirebase(projectId){
 }
 
 async function deleteAccountFromFirebase(accountId){
-  if(!window.db) return;
+  if(!window.db || !window.deleteDoc || !window.doc) return;
   try{
-    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    await deleteDoc(doc(window.db, 'accounts', accountId));
+    await window.deleteDoc(window.doc(window.db, 'accounts', accountId));
     console.log(`✓ Deleted account from Firestore: ${accountId}`);
   }catch(error){
     console.error('❌ Firestore account delete error:', error.message);
