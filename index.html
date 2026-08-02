@@ -8322,8 +8322,9 @@ function renderProductionStatus() {
     .prod-table thead { background: var(--bg-active); }
     .prod-table th { padding: 10px 12px; text-align: left; font-weight: 600; color: var(--tx); border-bottom: 1px solid var(--border); white-space: nowrap; }
     .prod-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .prod-acct-header { background: transparent; font-weight: 600; font-size: 13px; color: var(--tx); padding: 9px 12px !important; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border) !important; text-transform: uppercase; letter-spacing: 0.5px; }
-    .prod-acct-header::before { content: "▼ "; margin-right: 4px; display: inline-block; font-size: 10px; }
+    .prod-acct-header { background: transparent; font-weight: 600; font-size: 13px; color: var(--tx); padding: 9px 12px !important; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border) !important; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
+    .prod-acct-header:hover { background: var(--bg-hover); }
+    .prod-acct-arrow { display: inline-block; width: 12px; margin-right: 4px; font-size: 10px; transition: transform 0.2s; }
     .prod-prog-header { background: var(--bg-subtle); font-weight: 500; font-size: 12px; color: var(--tx); padding: 8px 12px !important; border-bottom: 1px solid var(--border) !important; display: flex; align-items: center; gap: 6px; }
     .prod-color-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
     .prod-prog-name { flex: 1; }
@@ -8402,18 +8403,22 @@ function renderProductionStatus() {
       const programNames = Object.keys(programs).sort();
 
       // Account group header
+      const acctId = acct?.id || acctName;
+      const isCollapsed = window.prodCollapsed && window.prodCollapsed[acctId];
+      const arrowDir = isCollapsed ? '▶' : '▼';
       html += `<tr>
-        <td colspan="5" class="prod-acct-header" style="border-bottom-color: ${acctColor};">
-          ${acctName} (${programNames.length} program${programNames.length !== 1 ? 's' : ''})
+        <td colspan="5" class="prod-acct-header" onclick="toggleProdAcctCollapse('${acctId}')" style="border-bottom-color: ${acctColor}; cursor: pointer;">
+          <span class="prod-acct-arrow">${arrowDir}</span> ${acctName} (${programNames.length} program${programNames.length !== 1 ? 's' : ''})
         </td>
       </tr>`;
 
-      for (let progIdx = 0; progIdx < programNames.length; progIdx++) {
-        const progName = programNames[progIdx];
-        const progData = programs[progName];
-        const prog = projects.find(p => p.name === progName && p.accountId === acct.id);
-        const progColor = prog?.color || '#6366F1';
-        const deliveries = progData.deliveries;
+      if (!isCollapsed) {
+        for (let progIdx = 0; progIdx < programNames.length; progIdx++) {
+          const progName = programNames[progIdx];
+          const progData = programs[progName];
+          const prog = projects.find(p => p.name === progName && p.accountId === acct.id);
+          const progColor = prog?.color || '#6366F1';
+          const deliveries = progData.deliveries;
 
         // Sort by contract date
         deliveries.sort((a, b) => {
@@ -8467,6 +8472,7 @@ function renderProductionStatus() {
             </td>
           </tr>`;
         }
+      }
       }
     }
 
@@ -8721,7 +8727,14 @@ function exportProductionCSV() {
   window.URL.revokeObjectURL(url);
 }
 
+function toggleProdAcctCollapse(acctId) {
+  if (!window.prodCollapsed) window.prodCollapsed = {};
+  window.prodCollapsed[acctId] = !window.prodCollapsed[acctId];
+  renderProductionStatus();
+}
+
 window.renderProductionStatus = renderProductionStatus;
+window.toggleProdAcctCollapse = toggleProdAcctCollapse;
 window.openAddDeliveryModal = openAddDeliveryModal;
 window.updateDeliveryPrograms = updateDeliveryPrograms;
 window.confirmAddDelivery = confirmAddDelivery;
