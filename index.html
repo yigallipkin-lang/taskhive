@@ -2707,7 +2707,6 @@ function restoreScrollPosition(){
 }
 
 function render(){
-  if(window.repairCellEditing || window.topicsCellEditing) return;
   buildRenderCache();  // Build lookup maps once per render
   buildSortCache();    // Build sorted arrays once per render
   renderSidebar();
