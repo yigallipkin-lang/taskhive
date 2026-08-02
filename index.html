@@ -7129,6 +7129,7 @@ function handleImport(e){
 // NAVIGATION HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 function setView(v){
+  hideModal();  // Close any open modals when switching views
   state.view = v;
   sv(); render();
   window.scrollTo(0,0);
