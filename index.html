@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="1.12.5">
+<meta name="version" content="2.9.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -232,6 +232,8 @@
 
   // Realtime Database sync for Repair Data
   if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbOnValue){
+    console.log('🔌 Setting up Realtime Database listeners...');
+
     const repairRef = window.dbRef(window.rtdb, 'repairStatusData');
     window.dbOnValue(repairRef, (snapshot) => {
       if(snapshot.exists()){
@@ -244,98 +246,33 @@
     }, (error) => {
       console.warn('⚠ Repair data listener error:', error.message);
     });
+    console.log('✅ Repair listener registered');
+  } else {
+    console.warn('⚠ Firebase not ready for listeners. Initialized:', window.firebaseInitialized, 'RTDB:', !!window.rtdb);
   }
 
-  // Realtime Database sync for Topics Data with fallback
-  if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbOnValue){
-    const topicsRef = window.dbRef(window.rtdb, 'upcomingTopicsData');
-    console.log('🔥 Setting up Topics Firebase listener...');
+  // Firestore listener for Upcoming Topics
+  if(window.firebaseInitialized && window.db) {
     try {
-      window.dbOnValue(topicsRef, (snapshot) => {
-        console.log('📱 Topics listener fired, exists:', snapshot.exists());
-        if(snapshot.exists()){
-          const data = snapshot.val();
-          console.log('📱 Topics raw data:', data);
-          window.upcomingTopicsData = Array.isArray(data) ? data : (data ? Object.values(data) : []);
-          console.log('📱 Firebase Topics Data synced:', window.upcomingTopicsData.length, 'topics');
-          localStorage.setItem('upcomingTopicsData', JSON.stringify(window.upcomingTopicsData));
-          if(window.render && !window.topicsCellEditing) window.render();
-        } else {
-          console.log('📱 Topics snapshot empty in Firebase');
-          if(!window.upcomingTopicsData || window.upcomingTopicsData.length === 0) {
-            window.upcomingTopicsData = [];
-          }
+      const { doc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+      const topicsRef = doc(window.db, 'appData', 'upcomingTopics');
+      const unsubscribe = onSnapshot(topicsRef, (snapshot) => {
+        if(snapshot.exists()) {
+          const data = snapshot.data();
+          window.topicsData = data.topics || [];
+          console.log('📱 Firestore Topics synced:', window.topicsData.length, 'records');
+          localStorage.setItem('taskhive_topics', JSON.stringify(window.topicsData));
+          if(window.render) window.render();
         }
       }, (error) => {
-        console.error('⚠ Topics listener error:', error.code, error.message);
+        console.warn('⚠ Topics listener error:', error.message);
       });
-    } catch(e) {
-      console.error('❌ Topics listener setup failed:', e.message);
+      window.firestoreUnsubscribers.push(unsubscribe);
+      console.log('✅ Topics Firestore listener registered');
+    } catch(error) {
+      console.error('❌ Failed to set up topics listener:', error.message);
     }
-  } else {
-    console.warn('⚠ Firebase not ready:', {fb: window.firebaseInitialized, rtdb: !!window.rtdb});
   }
-
-  // ✅ CRITICAL FIX: Periodic Topics sync to handle listener failures
-  window.setupTopicsSyncFallback = function(){
-    console.log('🔄 Setting up periodic Topics Firebase sync (10s interval)...');
-
-    // Fetch from Firebase every 10 seconds
-    setInterval(async function(){
-      if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) {
-        console.log('⏭️ [SYNC] Firebase not ready, skipping periodic check');
-        return;
-      }
-      try {
-        const snapshot = await window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'));
-        const localTopics = window.upcomingTopicsData || [];
-
-        if(snapshot.exists()){
-          const fbData = snapshot.val();
-          const fbTopics = Array.isArray(fbData) ? fbData : (fbData ? Object.values(fbData) : []);
-          console.log('🔄 [SYNC CHECK] Firebase:', fbTopics.length, 'Local:', localTopics.length);
-
-          // Update if Firebase data is different
-          if(fbTopics.length !== localTopics.length ||
-             JSON.stringify(fbTopics) !== JSON.stringify(localTopics)){
-            console.log('🔄 [SYNC] Topics CHANGED - updating from Firebase');
-            window.upcomingTopicsData = fbTopics;
-            localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
-            if(window.render && !window.topicsCellEditing) window.render();
-          } else {
-            console.log('✓ [SYNC] Topics already in sync');
-          }
-        } else {
-          console.log('📭 [SYNC] Firebase data is empty');
-        }
-      } catch(e) {
-        console.error('❌ [SYNC] Error:', e.message?.substring(0,50));
-      }
-    }, 10000);
-
-    // Force sync when page becomes visible
-    document.addEventListener('visibilitychange', async function(){
-      if(!document.hidden){
-        console.log('👁️ Page visible - forcing Topics sync from Firebase');
-        if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) return;
-        try {
-          const snapshot = await window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'));
-          if(snapshot.exists()){
-            const fbData = snapshot.val();
-            const fbTopics = Array.isArray(fbData) ? fbData : (fbData ? Object.values(fbData) : []);
-            window.upcomingTopicsData = fbTopics;
-            localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
-            if(window.render && !window.topicsCellEditing) window.render();
-          }
-        } catch(e) {
-          console.warn('⚠ Visibility sync failed:', e.message?.substring(0,40));
-        }
-      }
-    });
-  };
-
-  // Start sync fallback after short delay to ensure Firebase is ready
-  setTimeout(window.setupTopicsSyncFallback, 500);
 </script>
 
 <!-- CSV Import (hidden - accessible via console or settings) -->
@@ -2799,6 +2736,7 @@ function renderSidebar(){
     {id:'proj-summary',label:'Projects Summary',icon:'layout-grid'},
     {id:'project-info',label:'Project Info',icon:'info'},
     {id:'upcoming-topics',label:'Upcoming Topics',icon:'message-square'},
+    {id:'production-status',label:'Production Status',icon:'calendar'},
     {id:'project-list',label:'Project List',icon:'clipboard-list'},
   ];
   const archiveItems = [
@@ -2914,7 +2852,7 @@ function renderTopBar(){
     <div class="topbar-button-group">
       ${(v === 'table' || v === 'project-list') ? `<button class="topbar-btn" onclick="toggleColumnMenu(event)" title="Toggle columns"><span style="display:flex;align-items:center;gap:6px">${lucideIcon('columns-2','14')} Columns</span></button>` : ''}
       <button class="topbar-btn" onclick="printCurrentView()" title="Print current view">${lucideIcon('printer','14')} Print</button>
-      <button class="topbar-btn" onclick="exportCSV()" title="Export CSV">${lucideIcon('download','14')} Export</button>
+      ${(['table','project-list','upcoming-topics','production-status','repair-status'].includes(v)) ? `<button class="topbar-btn" onclick="exportCurrentView()" title="Export CSV">${lucideIcon('download','14')} Export</button>` : ''}
       <label class="topbar-btn" style="cursor:pointer" title="Import CSV">${lucideIcon('upload','14')} Import<input type="file" accept=".csv" style="display:none" onchange="handleImport(event)"></label>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">${lucideIcon(themeIcon,'18')}</button>
     </div>
@@ -3178,6 +3116,7 @@ function renderMain(){
   else if(v==='project-info') renderProjectInfoDashboard();
   else if(v==='project-list') renderProjectList();
   else if(v==='upcoming-topics') renderUpcomingTopicsTable();
+  else if(v==='production-status') renderProductionStatus();
   else if(v==='archived-projects') renderArchivedProjects();
   else if(v==='today') renderSmartList('today');
   else if(v==='followup') renderSmartList('followup');
@@ -8093,330 +8032,719 @@ window.exportRepairData=exportRepairData;
 // UPCOMING TOPICS TABLE - v1.0
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Default topics data
-const DEFAULT_TOPICS_DATA = [];
-// Load from localStorage as temporary fallback
-try{
-  const saved = localStorage.getItem('upcomingTopicsData');
-  window.upcomingTopicsData = saved ? JSON.parse(saved) : [];
-  if(saved) console.log('✓ Topics loaded from localStorage:', window.upcomingTopicsData.length, 'items');
-}catch(e){
-  window.upcomingTopicsData = [];
-  console.warn('Could not load topics from localStorage:', e.message);
+// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// UPCOMING TOPICS - Clean & Simple Implementation
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Initialize topics data from localStorage
+try {
+  const saved = localStorage.getItem('taskhive_topics');
+  window.topicsData = saved ? JSON.parse(saved) : [];
+} catch(e) {
+  window.topicsData = [];
 }
 
-// Fetch latest topics from Firebase on initialization (fallback for dead listeners)
-window.fetchTopicsFromFirebase = async function(){
-  if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbGet) {
-    console.log('⏳ Firebase not ready yet for topics fetch');
+// ═══════════════════════════════════════════════════════════════════════════════
+// UPCOMING TOPICS - Simple & Clean Rendering
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function saveTopics() {
+  const topicsData = window.topicsData || [];
+  localStorage.setItem('taskhive_topics', JSON.stringify(topicsData));
+  syncTopicsToFirestore().catch(err => console.error('Topics sync error:', err.message));
+}
+
+async function syncTopicsToFirestore() {
+  if (!window.db) {
+    console.warn('⚠ Firebase not ready for topics sync');
     return;
   }
-  try {
-    console.log('🔄 Fetching topics from Firebase...');
-    const snapshot = await window.dbGet(window.dbRef(window.rtdb, 'upcomingTopicsData'));
-    if(snapshot.exists()){
-      const data = snapshot.val();
-      const fbTopics = Array.isArray(data) ? data : (data ? Object.values(data) : []);
-      console.log('✅ Fetched from Firebase:', fbTopics.length, 'topics');
-      // Always update from Firebase - it's the source of truth
-      window.upcomingTopicsData = fbTopics;
-      localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
-      console.log('✓ Topics synced from Firebase:', fbTopics.length, 'items');
-    }
-  } catch(e) {
-    console.log('⚠ Topics Firebase fetch skipped:', e.message?.substring(0, 50));
-  }
-};
-// Fetch on init after brief delay to let Firebase initialize
-setTimeout(window.fetchTopicsFromFirebase, 2000);
-
-// Set up real-time listener for topics
-window.topicsListenerUnsubscribe = null;
-function setupTopicsListener(){
-  if(!window.firebaseInitialized || !window.rtdb || !window.dbRef || !window.dbOnValue) {
-    console.log('⏳ Firebase not ready for topics listener');
-    return;
-  }
-  try {
-    console.log('🔥 Setting up real-time topics listener...');
-    const ref = window.dbRef(window.rtdb, 'upcomingTopicsData');
-    window.topicsListenerUnsubscribe = window.dbOnValue(ref, (snapshot) => {
-      if(snapshot.exists()){
-        const data = snapshot.val();
-        const fbTopics = Array.isArray(data) ? data : (data ? Object.values(data) : []);
-        window.upcomingTopicsData = fbTopics;
-        localStorage.setItem('upcomingTopicsData', JSON.stringify(fbTopics));
-        console.log('📱 Topics real-time sync:', fbTopics.length, 'items');
-        render();
-      }
-    }, (error) => {
-      console.error('❌ Topics listener error:', error.message);
-    });
-    console.log('✅ Topics listener ready');
-  } catch(e) {
-    console.error('❌ Topics listener setup error:', e.message);
-  }
-}
-// Start listener after Firebase initializes
-setTimeout(setupTopicsListener, 2500);
-
-// Save topics to localStorage and Firebase
-function saveTopicsData(){
-  try{
-    const data = window.upcomingTopicsData || [];
-    localStorage.setItem('upcomingTopicsData', JSON.stringify(data));
-    console.log('✓ Topics saved to localStorage:', data.length, 'items');
-
-    // Direct sync to Firebase without merge (simpler, more reliable)
-    const fbReady = window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet;
-    console.log('🔍 Firebase ready check:', {
-      initialized: window.firebaseInitialized,
-      rtdb: !!window.rtdb,
-      dbRef: !!window.dbRef,
-      dbSet: !!window.dbSet,
-      ready: fbReady
-    });
-
-    if(fbReady){
-      try {
-        const ref = window.dbRef(window.rtdb, 'upcomingTopicsData');
-        console.log('📤 Attempting Firebase write with', data.length, 'items...');
-        window.dbSet(ref, data)
-          .then(() => {
-            console.log('✅ Topics synced to Firebase:', data.length, 'items');
-          })
-          .catch(e => {
-            console.error('❌ Firebase write failed:', e.code, e.message);
-          });
-      } catch(refError) {
-        console.error('❌ Firebase ref/set error:', refError.message);
-      }
-    } else {
-      console.warn('⚠ Firebase not ready for write', {initialized: window.firebaseInitialized, rtdb: !!window.rtdb});
-    }
-  }catch(e){
-    console.error('Error saving topics data:', e.message);
-  }
-}
-
-function renderUpcomingTopicsTable(){
-  const projects = state.projects || [];
-  const accounts = state.accounts || [];
-
-  let html=`<style>
-    .topics-view-header{padding:20px;border-bottom:2px solid var(--border);background:var(--bg-card)}
-    .topics-view-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--tx);margin-bottom:4px}
-    .topics-view-subtitle{font-size:12px;color:var(--mu)}
-    .topics-table-container{overflow-x:auto;margin:0;background:var(--bg-app)}
-    .topics-table{width:100%;border-collapse:collapse;background:var(--bg-card);font-size:13px;border:1px solid var(--border);table-layout:auto}
-    .topics-table th{background:var(--bg-active);color:var(--tx);padding:12px 8px;text-align:left;font-weight:600;border-bottom:2px solid var(--border);white-space:normal;word-wrap:break-word;border-right:1px solid var(--border);overflow:visible;line-height:1.3}
-    .topics-table th:nth-child(1){width:30%;min-width:100px}
-    .topics-table th:nth-child(2){width:20%;min-width:80px}
-    .topics-table th:nth-child(3){width:45%;min-width:150px}
-    .topics-table th:last-child{border-right:none;width:5%;min-width:40px}
-    .topics-table td{padding:10px 8px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);word-break:break-word;background:var(--bg-card);overflow:hidden}
-    .topics-table td:nth-child(1){width:30%;min-width:100px}
-    .topics-table td:nth-child(2){width:20%;min-width:80px}
-    .topics-table td:nth-child(3){width:45%;min-width:150px}
-    .topics-table td:last-child{border-right:none;width:5%;min-width:40px;padding:6px}
-    .topics-table tbody tr:hover{background:var(--bg-hover)}
-    .topics-cell{cursor:pointer;padding:6px;border-radius:4px;transition:all .15s;min-height:32px;display:flex;align-items:center;width:100%;box-sizing:border-box}
-    .topics-cell:hover{background:var(--accent-subtle)}
-    .topics-cell.editing{padding:0;display:block}
-    .topics-input,.topics-select{width:100%;padding:8px;border:2px solid var(--accent);border-radius:6px;font-family:var(--font-body);font-size:13px;box-sizing:border-box;background:white;color:var(--tx)}
-    .topics-select{cursor:pointer}
-    .topics-select:focus,.topics-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
-    .topics-actions{text-align:center;padding:20px;background:var(--bg-card);border-top:1px solid var(--border);display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .topics-btn{padding:10px 18px;border:1px solid var(--border);border-radius:8px;background:white;color:var(--tx);cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
-    .topics-btn:hover{background:var(--bg-active);border-color:var(--accent);color:var(--accent)}
-    .topics-btn.delete:hover{background:rgba(220,38,38,0.1);border-color:var(--red);color:var(--red)}
-  </style>
-  <div class="topics-view-header">
-    <div class="topics-view-title">📋 Upcoming Topics</div>
-    <div class="topics-view-subtitle">Discussion Topics & Meeting Prep Items</div>
-  </div>
-  <div class="topics-table-container">
-    <table class="topics-table">
-      <thead>
-        <tr>
-          <th>Account</th>
-          <th>Program</th>
-          <th>Topic</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>`;
-
-  const topicsData = window.upcomingTopicsData || [];
-  console.log('renderUpcomingTopicsTable - topicsData:', topicsData.length, 'items');
 
   try {
-    const sortedData = [...topicsData].sort((a, b) => {
-      const acctCmp = (a.account || '').localeCompare(b.account || '');
-      if(acctCmp !== 0) return acctCmp;
-      return (a.program || '').localeCompare(b.program || '');
-    });
-    console.log('sortedData after sort:', sortedData.length, 'items');
-
-    sortedData.forEach((row, idx) => {
-      try {
-        const project = projects.find(p => p.name === row.program);
-        let account = accounts.find(a => a.name === row.account);
-        if(!account && row.account) {
-          account = accounts.find(a => a.name.toLowerCase() === row.account.toLowerCase());
-        }
-        if(!account && row.account) {
-          account = accounts.find(a => a.name.toLowerCase().includes(row.account.toLowerCase()) || row.account.toLowerCase().includes(a.name.toLowerCase()));
-        }
-        const progColor = project ? project.color : '#F59E0B';
-        const acctColor = account ? account.color : '#6B7280';
-
-        html+=`<tr data-record-id="${row.id}">
-          <td><div class="topics-cell" data-field="account" style="border-left:4px solid ${acctColor}" title="Click to edit">${row.account}</div></td>
-          <td><div class="topics-cell" data-field="program" style="border-left:4px solid ${progColor}" title="Click to edit">${row.program}</div></td>
-          <td><div class="topics-cell" data-field="topic" title="Click to edit">${row.topic}</div></td>
-          <td style="text-align:center;padding:6px"><button class="topics-btn delete" onclick="deleteTopicRecord('${row.id}')" title="Delete topic">🗑️</button></td>
-        </tr>`;
-        console.log('✓ Added topic row', idx, ':', row.account, row.program, row.topic);
-      } catch(e) {
-        console.error('Error adding row', idx, ':', e.message, e.stack);
-      }
-    });
-  } catch(e) {
-    console.error('Error in renderUpcomingTopicsTable:', e.message, e.stack);
+    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    const topicsData = window.topicsData || [];
+    const docRef = doc(window.db, 'appData', 'upcomingTopics');
+    await setDoc(docRef, { topics: topicsData }, { merge: true });
+    console.log('✅ Topics synced to Firestore:', topicsData.length, 'records');
+  } catch (error) {
+    console.error('❌ Topics sync failed:', error.code, error.message);
+    throw error;
   }
-
-  html+=`</tbody></table></div>
-  <div class="topics-actions">
-    <button class="topics-btn" onclick="addTopicRecord()">➕ Add Topic</button>
-    <button class="topics-btn" onclick="exportTopicsData()">📥 Export CSV</button>
-  </div>`;
-
-  document.getElementById('main').innerHTML=html;
-  setupTopicsEditHandlers();
 }
 
-function setupTopicsEditHandlers(){
-  setTimeout(()=>{
-    const cells=document.querySelectorAll('.topics-cell');
-    console.log('Setting up ' + cells.length + ' topics cells');
-
-    cells.forEach(cell=>{
-      cell.addEventListener('click',function(e){
-        e.stopPropagation();
-        e.preventDefault();
-
-        const recordId=this.closest('tr').dataset.recordId;
-        const field=this.dataset.field;
-        const currentValue=this.textContent.trim().replace(/\s+/g,' ');
-        const cellRef=this;
-        window.topicsCellEditing=true;
-
-        this.classList.add('editing');
-
-        if(field==='account'){
-          const accountsList=state.accounts||[];
-          let ddl=`<div class="topics-custom-dropdown" style="width:100%;border:2px solid #F59E0B;border-radius:6px;background:white;box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:1000;position:relative">`;
-          ddl+='<div class="topics-dd-option" data-value="" style="padding:8px;cursor:pointer;border-bottom:1px solid #E5E7EB;background:white">-- Select Account --</div>';
-          accountsList.forEach(a=>{ddl+=`<div class="topics-dd-option" data-value="${a.name}" style="padding:8px;cursor:pointer;border-bottom:1px solid #E5E7EB;background:white;${a.name===currentValue?'background:#F59E0B;color:white':''}">${a.name}</div>`});
-          ddl+='</div>';
-          this.innerHTML=ddl;
-          const handleClick=(e)=>{
-            if(e.target.classList.contains('topics-dd-option')){
-              const rec=upcomingTopicsData.find(r=>r.id===recordId);
-              const val=e.target.dataset.value;
-              if(rec){rec[field]=val;saveTopicsData();}
-              cellRef.classList.remove('editing');window.topicsCellEditing=false;
-              cellRef.innerHTML=val;
-            }
-          };
-          this.addEventListener('click',handleClick);
-        }else if(field==='program'){
-          // Get account from same row to filter programs
-          const row = this.closest('tr');
-          const accountCell = row.querySelector('[data-field="account"]');
-          const selectedAccount = accountCell ? accountCell.textContent.trim() : '';
-
-          const accounts = state.accounts || [];
-          let account = accounts.find(a => a.name === selectedAccount);
-          if(!account && selectedAccount) {
-            account = accounts.find(a => a.name.toLowerCase() === selectedAccount.toLowerCase());
-          }
-          if(!account && selectedAccount) {
-            account = accounts.find(a => a.name.toLowerCase().includes(selectedAccount.toLowerCase()) || selectedAccount.toLowerCase().includes(a.name.toLowerCase()));
-          }
-          const accountId = account ? account.id : null;
-
-          // Filter projects by accountId
-          const projectsList = (state.projects || []).filter(p => !accountId || p.accountId === accountId);
-
-          let ddl=`<div class="topics-custom-dropdown" style="width:100%;border:2px solid #F59E0B;border-radius:6px;background:white;box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:1000;position:relative">`;
-          ddl+='<div class="topics-dd-option" data-value="" style="padding:8px;cursor:pointer;border-bottom:1px solid #E5E7EB;background:white">-- Select Program --</div>';
-          projectsList.forEach(p=>{ddl+=`<div class="topics-dd-option" data-value="${p.name}" style="padding:8px;cursor:pointer;border-bottom:1px solid #E5E7EB;background:white;${p.name===currentValue?'background:#F59E0B;color:white':''}">${p.name}</div>`});
-          ddl+='</div>';
-          this.innerHTML=ddl;
-          const handleClick=(e)=>{
-            if(e.target.classList.contains('topics-dd-option')){
-              const rec=(window.upcomingTopicsData||[]).find(r=>r.id===recordId);
-              const val=e.target.dataset.value;
-              if(rec){rec[field]=val;saveTopicsData();}
-              cellRef.classList.remove('editing');window.topicsCellEditing=false;
-              cellRef.innerHTML=val;
-            }
-          };
-          this.addEventListener('click',handleClick);
-        }else{
-          this.innerHTML=`<input class="topics-input" type="text" value="${currentValue}" style="width:100%;padding:8px;border:2px solid #F59E0B;border-radius:6px;font-size:13px;min-width:100px;box-sizing:border-box" />`;
-          const inp=this.querySelector('input');
-          inp.onkeydown=(e)=>{if(e.key==='Enter'){const rec=(window.upcomingTopicsData||[]).find(r=>r.id===recordId);if(rec){rec[field]=inp.value;saveTopicsData();}cellRef.classList.remove('editing');window.topicsCellEditing=false;setTimeout(()=>render(),100);}if(e.key==='Escape'){cellRef.classList.remove('editing');window.topicsCellEditing=false;setTimeout(()=>render(),100)}};
-          inp.onblur=()=>{const rec=(window.upcomingTopicsData||[]).find(r=>r.id===recordId);if(rec){rec[field]=inp.value;saveTopicsData();}cellRef.classList.remove('editing');window.topicsCellEditing=false;setTimeout(()=>render(),100);};
-          inp.focus();
-          inp.select();
-        }
-      });
-    });
-  },50);
-}
-
-function addTopicRecord(){
-  const newId='topic-'+(Date.now())+'-'+(Math.random().toString(36).substr(2,9));
-  if(!window.upcomingTopicsData) window.upcomingTopicsData = [];
-  window.upcomingTopicsData.push({id:newId,account:'',program:'',topic:'New Topic'});
-  saveTopicsData();
+function addTopic() {
+  if (!window.topicsData) window.topicsData = [];
+  window.topicsData.push({
+    id: 'topic-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+    account: '',
+    program: '',
+    topic: ''
+  });
+  saveTopics();
   render();
 }
 
-function deleteTopicRecord(recordId){
-  if(confirm('Delete this topic?')){
-    if(!window.upcomingTopicsData) window.upcomingTopicsData = [];
-    const idx=window.upcomingTopicsData.findIndex(r=>r.id===recordId);
-    if(idx>-1){
-      window.upcomingTopicsData.splice(idx,1);
-      saveTopicsData();
-      render();
-    }
+function deleteTopic(id) {
+  window.topicsData = window.topicsData.filter(t => t.id !== id);
+
+  // Delete from Firebase
+  if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet){
+    window.dbSet(window.dbRef(window.rtdb, `upcomingTopicsData/${id}`), null)
+      .catch(e => console.error('❌ Firebase delete failed:', e.code, e.message));
+  }
+
+  saveTopics();
+  render();
+}
+
+function updateTopic(id, field, value) {
+  const topic = window.topicsData.find(t => t.id === id);
+  if (topic) {
+    topic[field] = value;
+    saveTopics();
+    render();
   }
 }
 
-function exportTopicsData(){
-  let csv='Account,Program,Topic\n';
-  upcomingTopicsData.forEach(row=>{
-    csv+=`"${row.account}","${row.program}","${row.topic}"\n`;
-  });
-  const blob=new Blob([csv],{type:'text/csv'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='upcoming-topics-'+new Date().toISOString().split('T')[0]+'.csv';
+function exportTopics() {
+  const headers = ['Account', 'Program', 'Topic'];
+  const rows = [(window.topicsData || []).map(t => [t.account, t.program, t.topic])];
+  const csv = [headers.join(','), ...rows[0].map(r => r.map(v => `"${(v || '').replace(/"/g, '""')}"`).join(','))];
+  const blob = new Blob([csv.join('\n')], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'topics-' + new Date().toISOString().split('T')[0] + '.csv';
   a.click();
   URL.revokeObjectURL(url);
 }
 
-// Expose topics functions globally
-window.renderUpcomingTopicsTable=renderUpcomingTopicsTable;
-window.setupTopicsEditHandlers=setupTopicsEditHandlers;
-window.addTopicRecord=addTopicRecord;
-window.deleteTopicRecord=deleteTopicRecord;
+function renderUpcomingTopicsTable() {
+  const accounts = state.accounts || [];
+  const projects = state.projects || [];
+  const topics = window.topicsData || [];
+
+  let html = `<style>
+    .topics-page { padding: 20px; background: var(--bg-app); }
+    .topics-header { margin-bottom: 20px; }
+    .topics-title { font-size: 20px; font-weight: 700; color: var(--tx); margin-bottom: 4px; }
+    .topics-subtitle { font-size: 13px; color: var(--t3); }
+    .topics-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+    .btn-primary { padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-delete { padding: 6px 12px; background: #EF4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .btn-delete:hover { background: #DC2626; }
+    .topics-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border: 1px solid var(--border); }
+    .topics-table th { background: var(--bg-active); color: var(--tx); padding: 12px 16px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--border); }
+    .topics-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .topics-table tbody tr:hover { background: var(--bg-hover); }
+    .topics-input { width: 100%; padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; font-family: inherit; }
+    .topics-select { width: 100%; padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; font-family: inherit; background: var(--bg-card); color: var(--tx); }
+    .topics-empty { text-align: center; padding: 40px 20px; color: var(--t3); }
+  </style>
+  <div class="topics-page">
+    <div class="topics-header">
+      <div class="topics-title">📋 Upcoming Topics</div>
+      <div class="topics-subtitle">Discussion Topics & Meeting Prep Items</div>
+    </div>
+    <div class="topics-actions">
+      <button class="btn-primary" onclick="addTopic()">➕ Add Topic</button>
+    </div>
+    <div style="font-size: 11px; color: var(--t3); margin-bottom: 12px;">Tip: Use EXPORT button in header to download CSV</div>`;
+
+  if (topics.length === 0) {
+    html += '<div class="topics-empty">No topics yet. Click "Add Topic" to get started.</div>';
+  } else {
+    html += `
+    <table class="topics-table" style="table-layout: auto; width: 100%;">
+      <colgroup>
+        <col style="min-width: 130px;">
+        <col style="min-width: 150px;">
+        <col style="width: 100%;">
+        <col style="width: 60px;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th style="padding: 12px 16px;">Account</th>
+          <th style="padding: 12px 16px;">Program</th>
+          <th style="padding: 12px 16px;">Topic</th>
+          <th style="text-align: center; padding: 12px 16px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    topics.forEach(topic => {
+      html += `
+        <tr data-topic-id="${topic.id}">
+          <td>
+            <select class="topics-select" onchange="updateTopic('${topic.id}', 'account', this.value)">
+              <option value="">-- Select Account --</option>
+              ${accounts.map(a => `<option value="${a.name}" ${topic.account === a.name ? 'selected' : ''}>${a.name}</option>`).join('')}
+            </select>
+          </td>
+          <td>
+            <select class="topics-select" onchange="updateTopic('${topic.id}', 'program', this.value)" ${!topic.account ? 'disabled' : ''}>
+              <option value="">-- Select Program --</option>
+              ${topic.account
+                ? (() => {
+                    const acct = accounts.find(a => a.name === topic.account);
+                    const acctId = acct ? acct.id : null;
+                    const filtered = projects.filter(p => !acctId || p.accountId === acctId);
+                    console.log(`📌 Account: ${topic.account} (ID: ${acctId}) → ${filtered.length} programs:`, filtered.map(p => `${p.name}(${p.accountId})`).join(', '));
+                    return filtered
+                      .map(p => `<option value="${p.name}" ${topic.program === p.name ? 'selected' : ''}>${p.name}</option>`)
+                      .join('');
+                  })()
+                : '<option value="" disabled>Select Account First</option>'}
+            </select>
+          </td>
+          <td>
+            <input type="text" class="topics-input" value="${topic.topic}" onchange="updateTopic('${topic.id}', 'topic', this.value)" placeholder="Enter topic...">
+          </td>
+          <td style="text-align: center;">
+            <button class="btn-delete" onclick="deleteTopic('${topic.id}')">Delete</button>
+          </td>
+        </tr>`;
+    });
+
+    html += `
+      </tbody>
+    </table>`;
+  }
+
+  html += '</div>';
+  document.getElementById('main').innerHTML = html;
+}
+
+window.renderUpcomingTopicsTable = renderUpcomingTopicsTable;
+window.addTopic = addTopic;
+window.deleteTopic = deleteTopic;
+window.updateTopic = updateTopic;
+window.exportTopics = exportTopics;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRODUCTION STATUS VIEW
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function getProductionDateRange() {
+  const now = new Date();
+  const startDate = new Date(now.getFullYear(), now.getMonth() - 4, 1);
+  const endDate = new Date(now.getFullYear(), now.getMonth() + 20, 1);
+
+  const dates = [];
+  let current = new Date(startDate);
+  while (current < endDate) {
+    const year = current.getFullYear();
+    const month = String(current.getMonth() + 1).padStart(2, '0');
+    dates.push(`${year}-${month}`);
+    current.setMonth(current.getMonth() + 1);
+  }
+  return dates;
+}
+
+function initializeProductionData() {
+  if (!window.productionData) {
+    const stored = localStorage.getItem('productionStatusData');
+    window.productionData = stored ? JSON.parse(stored) : [];
+    console.log('📦 Production data initialized from localStorage:', window.productionData.length, 'records');
+  }
+  return window.productionData;
+}
+
+function saveProductionData() {
+  const prodData = window.productionData || [];
+  localStorage.setItem('productionStatusData', JSON.stringify(prodData));
+
+  // Sync individual records to Firebase (not entire array, to avoid write conflicts)
+  if(window.firebaseInitialized && window.rtdb && window.dbRef && window.dbSet){
+    prodData.forEach(record => {
+      if(record && record.id) {
+        window.dbSet(window.dbRef(window.rtdb, `productionStatusData/${record.id}`), record)
+          .catch(e => console.error('❌ Firebase write failed for', record.id, ':', e.code, e.message));
+      }
+    });
+    console.log('✅ Production data synced to Firebase:', prodData.length, 'records');
+  } else {
+    console.warn('⚠ Firebase not ready for write');
+  }
+}
+
+function getProductionStatus(contract, planned, production) {
+  if (production === null || production === undefined || production === '') {
+    return { status: 'unknown', color: '#9CA3AF', label: 'TBD' };
+  }
+  const prod = parseInt(production);
+  const plan = parseInt(planned) || 0;
+
+  if (prod >= plan) {
+    return { status: 'on-track', color: '#10B981', label: '✓' };
+  }
+  return { status: 'delayed', color: '#EF4444', label: '✗' };
+}
+
+function getDeliveryStatus(contractDate, actualDate) {
+  if (!actualDate) return { label: 'Planned - On-Time', color: '#10B981' };
+
+  const contract = new Date(contractDate);
+  const actual = new Date(actualDate);
+  const isOnTime = actual <= contract;
+
+  if (isOnTime) {
+    return { label: 'Delivered - On-Time', color: '#10B981' };
+  } else {
+    return { label: 'Delivered - Late', color: '#EF4444' };
+  }
+}
+
+function renderProductionStatus() {
+  const projects = state.projects || [];
+  const accounts = state.accounts || [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let html = `<style>
+    .prod-page { padding: 12px; background: var(--bg-app); }
+    .prod-header { margin-bottom: 16px; }
+    .prod-title { font-size: 20px; font-weight: 700; color: var(--tx); margin-bottom: 4px; }
+    .prod-subtitle { font-size: 13px; color: var(--t3); }
+    .prod-actions { display: flex; gap: 10px; margin-bottom: 16px; }
+    .btn-primary { padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .btn-primary:hover { opacity: 0.9; }
+    .prod-table-container { border: 1px solid var(--border); border-radius: 6px; background: var(--bg-card); overflow: hidden; }
+    .prod-table { width: 100%; border-collapse: collapse; background: var(--bg-card); font-size: 12px; }
+    .prod-table thead { background: var(--bg-active); }
+    .prod-table th { padding: 12px 14px; text-align: left; font-weight: 600; color: var(--tx); border-bottom: 2px solid var(--border); white-space: nowrap; }
+    .prod-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .prod-acct-header { background: transparent; font-weight: 600; font-size: 13px; color: var(--tx); padding: 16px 16px 12px 16px !important; cursor: pointer; user-select: none; border-bottom: 2px solid var(--border) !important; text-transform: uppercase; letter-spacing: 0.5px; }
+    .prod-acct-header::before { content: "▼ "; margin-right: 6px; display: inline-block; font-size: 11px; }
+    .prod-prog-header { background: var(--bg-subtle); font-weight: 500; font-size: 12px; color: var(--tx); padding: 10px 16px 10px 24px !important; border-bottom: 2px solid var(--border) !important; display: flex; align-items: center; gap: 8px; }
+    .prod-color-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .prod-prog-name { flex: 1; }
+    .prod-delivery-row td { background: transparent; }
+    .prod-table tbody tr:hover { background: var(--bg-hover); }
+    .prod-table tbody tr.row-past { background: #F3F4F6; opacity: 0.7; }
+    .prod-input { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; font-family: inherit; background: var(--bg-app); color: var(--tx); }
+    .prod-input:hover { border-color: var(--t2); }
+    .prod-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px var(--bg-app); }
+    .prod-date-green { color: #059669; font-weight: 600; }
+    .prod-date-red { color: #DC2626; font-weight: 600; }
+    .btn-delete { padding: 4px 10px; background: #EF4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500; }
+    .btn-delete:hover { background: #DC2626; }
+    .prod-empty { text-align: center; padding: 60px 20px; color: var(--t3); }
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-box { background: var(--bg-card); border-radius: 8px; padding: 20px; min-width: 400px; border: 1px solid var(--border); }
+    .modal-title { font-size: 16px; font-weight: 600; color: var(--tx); margin-bottom: 14px; }
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--t2); margin-bottom: 4px; }
+    .form-input, .form-select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; background: var(--bg-app); color: var(--tx); font-family: inherit; }
+    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .btn-cancel { padding: 8px 14px; background: var(--bg-active); color: var(--tx); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 12px; }
+  </style>
+  <div class="prod-page">
+    <div class="prod-header">
+      <div class="prod-title">📦 Production Status</div>
+      <div class="prod-subtitle">Delivery tracking by Account, Program, and Contract Date</div>
+    </div>
+    <div class="prod-actions">
+      <button class="btn-primary" onclick="openAddDeliveryModal()">➕ Add Delivery</button>
+    </div>`;
+
+  // Group deliveries by account, then program
+  const byAccount = {};
+  for (const proj of projects) {
+    if (proj.deliveryData && proj.deliveryData.length > 0) {
+      const acct = accounts.find(a => a.id === proj.accountId);
+      const acctName = acct?.name || 'Unknown';
+
+      if (!byAccount[acctName]) byAccount[acctName] = {};
+      if (!byAccount[acctName][proj.name]) {
+        byAccount[acctName][proj.name] = { projectId: proj.id, deliveries: [] };
+      }
+
+      for (const del of proj.deliveryData) {
+        byAccount[acctName][proj.name].deliveries.push({ ...del, projectId: proj.id });
+      }
+    }
+  }
+
+  const accountNames = Object.keys(byAccount).sort();
+  const hasDeliveries = accountNames.length > 0;
+
+  if (!hasDeliveries) {
+    html += `<div class="prod-empty"><p>No deliveries tracked yet</p></div>`;
+  } else {
+    html += `<div class="prod-table-container">
+      <table class="prod-table">
+        <thead>
+          <tr>
+            <th style="width: 120px;">Account</th>
+            <th style="width: 140px;">Program</th>
+            <th style="width: 200px;">Delivery Description</th>
+            <th style="width: 100px;">Serial No.</th>
+            <th style="width: 120px;">Contract Date</th>
+            <th style="width: 140px;">Planned/Actual Date</th>
+            <th style="width: 70px; text-align: center;">Action</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+    // Render grouped and sorted data
+    for (let acctIdx = 0; acctIdx < accountNames.length; acctIdx++) {
+      const acctName = accountNames[acctIdx];
+      const acct = accounts.find(a => a.name === acctName);
+      const acctColor = acct?.color || '#8B5CF6';
+      const programs = byAccount[acctName];
+      const programNames = Object.keys(programs).sort();
+
+      // Account group header
+      html += `<tr>
+        <td colspan="7" class="prod-acct-header" style="border-bottom-color: ${acctColor};">
+          ${acctName} (${programNames.length} program${programNames.length !== 1 ? 's' : ''})
+        </td>
+      </tr>`;
+
+      for (let progIdx = 0; progIdx < programNames.length; progIdx++) {
+        const progName = programNames[progIdx];
+        const progData = programs[progName];
+        const prog = projects.find(p => p.name === progName && p.accountId === acct.id);
+        const progColor = prog?.color || '#6366F1';
+        const deliveries = progData.deliveries;
+
+        // Sort by contract date
+        deliveries.sort((a, b) => {
+          const dateA = a.contractDate ? new Date(a.contractDate) : new Date('9999-12-31');
+          const dateB = b.contractDate ? new Date(b.contractDate) : new Date('9999-12-31');
+          return dateA - dateB;
+        });
+
+        // Program group header
+        html += `<tr>
+          <td colspan="7" class="prod-prog-header">
+            <div class="prod-color-dot" style="background-color: ${progColor};"></div>
+            <span class="prod-prog-name">${progName}</span>
+          </td>
+        </tr>`;
+
+        for (const del of deliveries) {
+          const actualDate = del.actualDate ? new Date(del.actualDate) : null;
+          const contractDate = del.contractDate ? new Date(del.contractDate) : null;
+          const isPast = actualDate && actualDate < today;
+
+          let dateColorClass = '';
+          if (actualDate && contractDate) {
+            actualDate.setHours(0, 0, 0, 0);
+            contractDate.setHours(0, 0, 0, 0);
+            dateColorClass = actualDate <= contractDate ? 'prod-date-green' : 'prod-date-red';
+          }
+
+          const rowClass = isPast ? 'row-past' : '';
+
+          html += `<tr class="prod-delivery-row ${rowClass}">
+            <td></td>
+            <td></td>
+            <td>
+              <input type="text" class="prod-input" value="${del.description || ''}" placeholder="Add description"
+                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'description', this.value)">
+            </td>
+            <td>
+              <input type="text" class="prod-input" value="${del.serialNumber || ''}" placeholder="Serial #"
+                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'serialNumber', this.value)">
+            </td>
+            <td>
+              <input type="date" class="prod-input" value="${del.contractDate || ''}"
+                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'contractDate', this.value)">
+            </td>
+            <td>
+              <input type="date" class="prod-input" value="${del.actualDate || ''}"
+                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'actualDate', this.value)">
+            </td>
+            <td style="text-align: center; display: flex; gap: 4px; justify-content: center;">
+              <button class="btn-delete" onclick="duplicateDelivery('${del.projectId}', '${del.id}')" style="background: #3B82F6;">Duplicate</button>
+              <button class="btn-delete" onclick="deleteProjectDelivery('${del.projectId}', '${del.id}')">Delete</button>
+            </td>
+          </tr>`;
+        }
+      }
+    }
+
+    html += `</tbody>
+      </table>
+    </div>`;
+  }
+
+  html += `</div>`;
+  document.getElementById('main').innerHTML = html;
+}
+
+function openAddDeliveryModal() {
+  const accounts = state.accounts || [];
+  const projects = state.projects || [];
+
+  if (accounts.length === 0 || projects.length === 0) {
+    alert('Please create at least one Account and Program first.');
+    return;
+  }
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.innerHTML = `<div class="modal-box">
+    <div class="modal-title">Add Delivery</div>
+    <div class="form-group">
+      <label class="form-label">Account</label>
+      <select class="form-select" id="deliveryAccountId" onchange="updateDeliveryPrograms()">
+        <option value="">-- Select Account --</option>
+        ${accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Program</label>
+      <select class="form-select" id="deliveryProjectId">
+        <option value="">-- Select Program --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Delivery Description</label>
+      <input type="text" class="form-input" id="deliveryDescription" placeholder="e.g., Prototype Mockup">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Serial Number</label>
+      <input type="text" class="form-input" id="deliverySerialNumber" placeholder="e.g., 2087">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contract Delivery Date</label>
+      <input type="date" class="form-input" id="deliveryContractDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Planned/Actual Delivery Date</label>
+      <input type="date" class="form-input" id="deliveryActualDate">
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+      <button class="btn-primary" onclick="confirmAddDelivery()">Add</button>
+    </div>
+  </div>`;
+
+  document.body.appendChild(modal);
+}
+
+function updateDeliveryPrograms() {
+  const accountId = document.getElementById('deliveryAccountId').value;
+  const projects = state.projects || [];
+  const filtered = projects.filter(p => p.accountId === accountId);
+  const select = document.getElementById('deliveryProjectId');
+  select.innerHTML = '<option value="">-- Select Program --</option>' +
+    filtered.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+function confirmAddDelivery() {
+  const accountId = document.getElementById('deliveryAccountId').value;
+  const projectId = document.getElementById('deliveryProjectId').value;
+  const description = document.getElementById('deliveryDescription').value;
+  const serialNumber = document.getElementById('deliverySerialNumber').value;
+  const contractDate = document.getElementById('deliveryContractDate').value;
+  const actualDate = document.getElementById('deliveryActualDate').value;
+
+  if (!accountId) {
+    alert('Please select an Account');
+    return;
+  }
+
+  if (!projectId) {
+    alert('Please select a Program');
+    return;
+  }
+
+  if (!serialNumber) {
+    alert('Please enter Serial Number');
+    return;
+  }
+
+  const proj = state.projects.find(p => p.id === projectId);
+  if (!proj) return;
+
+  if (!proj.deliveryData) proj.deliveryData = [];
+
+  proj.deliveryData.push({
+    id: `del-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    description,
+    serialNumber,
+    contractDate,
+    actualDate
+  });
+
+  sv();
+  syncProjectToFirebase(proj).then(() => {
+    renderProductionStatus();
+  }).catch(err => {
+    console.error('Failed to sync delivery:', err.message);
+  });
+  document.querySelector('.modal-backdrop').remove();
+}
+
+function openQuickAddDelivery(projectId) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.innerHTML = `<div class="modal-box">
+    <div class="modal-title">Add Delivery</div>
+    <div class="form-group">
+      <label class="form-label">Serial Number</label>
+      <input type="text" class="form-input" id="quickSerialNumber" placeholder="e.g., 2087">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contract Delivery Date</label>
+      <input type="date" class="form-input" id="quickContractDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Actual / Planned Delivery Date</label>
+      <input type="date" class="form-input" id="quickActualDate">
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="this.closest('.modal-backdrop').remove()">Cancel</button>
+      <button class="btn-primary" onclick="confirmQuickDelivery('${projectId}')">Add</button>
+    </div>
+  </div>`;
+
+  document.body.appendChild(modal);
+}
+
+function confirmQuickDelivery(projectId) {
+  const serialNumber = document.getElementById('quickSerialNumber').value;
+  const contractDate = document.getElementById('quickContractDate').value;
+  const actualDate = document.getElementById('quickActualDate').value;
+
+  if (!serialNumber) {
+    alert('Please enter Serial Number');
+    return;
+  }
+
+  const proj = state.projects.find(p => p.id === projectId);
+  if (!proj) return;
+
+  if (!proj.deliveryData) proj.deliveryData = [];
+
+  proj.deliveryData.push({
+    id: `del-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    serialNumber,
+    contractDate,
+    actualDate
+  });
+
+  sv();
+  syncProjectToFirebase(proj).then(() => {
+    renderProductionStatus();
+  }).catch(err => {
+    console.error('Failed to sync delivery:', err.message);
+  });
+  document.querySelector('.modal-backdrop').remove();
+}
+
+function updateProjectDelivery(projectId, deliveryId, field, value) {
+  const proj = state.projects.find(p => p.id === projectId);
+  if (proj && proj.deliveryData) {
+    const del = proj.deliveryData.find(d => d.id === deliveryId);
+    if (del) {
+      del[field] = value;
+      sv();
+      syncProjectToFirebase(proj).catch(err => {
+        console.error('Failed to sync delivery update:', err.message);
+      });
+    }
+  }
+}
+
+function duplicateDelivery(projectId, deliveryId) {
+  const proj = state.projects.find(p => p.id === projectId);
+  if (!proj || !proj.deliveryData) return;
+
+  const delIndex = proj.deliveryData.findIndex(d => d.id === deliveryId);
+  if (delIndex === -1) return;
+
+  const original = proj.deliveryData[delIndex];
+  const duplicate = {
+    ...original,
+    id: `del-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  };
+
+  // Insert right after the original
+  proj.deliveryData.splice(delIndex + 1, 0, duplicate);
+  sv();
+  syncProjectToFirebase(proj).then(() => {
+    renderProductionStatus();
+  }).catch(err => {
+    console.error('Failed to sync duplicate:', err.message);
+  });
+}
+
+function deleteProjectDelivery(projectId, deliveryId) {
+  if (!confirm('Delete this delivery?')) return;
+
+  const proj = state.projects.find(p => p.id === projectId);
+  if (proj && proj.deliveryData) {
+    proj.deliveryData = proj.deliveryData.filter(d => d.id !== deliveryId);
+    sv();
+    syncProjectToFirebase(proj).then(() => {
+      renderProductionStatus();
+    }).catch(err => {
+      console.error('Failed to sync deletion:', err.message);
+    });
+  }
+}
+
+function exportProductionCSV() {
+  const accounts = state.accounts || [];
+  const projects = state.projects || [];
+
+  let csv = 'Account,Program,Serial Number,Contract Delivery Date,Actual/Planned Delivery Date,Status\n';
+
+  for (const proj of projects) {
+    if (!proj.deliveryData || proj.deliveryData.length === 0) continue;
+
+    const acct = accounts.find(a => a.id === proj.accountId);
+    const acctName = acct?.name || 'Unknown';
+
+    for (const delivery of proj.deliveryData) {
+      const status = getDeliveryStatus(delivery.contractDate, delivery.actualDate);
+      csv += `"${acctName}","${proj.name}","${delivery.serialNumber || ''}",` +
+             `"${delivery.contractDate || ''}","${delivery.actualDate || ''}","${status.label}"\n`;
+    }
+  }
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `deliveries-${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  window.URL.revokeObjectURL(url);
+}
+
+window.renderProductionStatus = renderProductionStatus;
+window.openAddDeliveryModal = openAddDeliveryModal;
+window.updateDeliveryPrograms = updateDeliveryPrograms;
+window.confirmAddDelivery = confirmAddDelivery;
+window.openQuickAddDelivery = openQuickAddDelivery;
+window.confirmQuickDelivery = confirmQuickDelivery;
+window.deleteProjectDelivery = deleteProjectDelivery;
+window.updateProjectDelivery = updateProjectDelivery;
+window.duplicateDelivery = duplicateDelivery;
+window.exportProductionCSV = exportProductionCSV;
+window.getDeliveryStatus = getDeliveryStatus;
+
+// Global export function
+function exportCurrentView() {
+  const view = state.view;
+  if (view === 'upcoming-topics') {
+    exportTopics();
+  } else if (view === 'production-status') {
+    exportProductionCSV();
+  } else if (view === 'repair-status') {
+    exportRepairData?.();
+  } else {
+    alert('Export not available for this view');
+  }
+}
+window.exportCurrentView = exportCurrentView;
 
 window.addEventListener('DOMContentLoaded', init);
 
