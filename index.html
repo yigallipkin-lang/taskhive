@@ -8311,26 +8311,26 @@ function renderProductionStatus() {
 
   let html = `<style>
     .prod-page { padding: 12px; background: var(--bg-app); }
-    .prod-header { margin-bottom: 16px; }
-    .prod-title { font-size: 20px; font-weight: 700; color: var(--tx); margin-bottom: 4px; }
-    .prod-subtitle { font-size: 13px; color: var(--t3); }
-    .prod-actions { display: flex; gap: 10px; margin-bottom: 16px; }
-    .btn-primary { padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .prod-header { margin-bottom: 12px; }
+    .prod-title { font-size: 20px; font-weight: 700; color: var(--tx); margin-bottom: 2px; }
+    .prod-subtitle { font-size: 12px; color: var(--t3); }
+    .prod-actions { display: flex; gap: 10px; margin-bottom: 12px; }
+    .btn-primary { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
     .btn-primary:hover { opacity: 0.9; }
     .prod-table-container { border: 1px solid var(--border); border-radius: 6px; background: var(--bg-card); overflow: hidden; }
     .prod-table { width: 100%; border-collapse: collapse; background: var(--bg-card); font-size: 12px; }
     .prod-table thead { background: var(--bg-active); }
-    .prod-table th { padding: 12px 14px; text-align: left; font-weight: 600; color: var(--tx); border-bottom: 2px solid var(--border); white-space: nowrap; }
-    .prod-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .prod-acct-header { background: transparent; font-weight: 600; font-size: 13px; color: var(--tx); padding: 16px 16px 12px 16px !important; cursor: pointer; user-select: none; border-bottom: 2px solid var(--border) !important; text-transform: uppercase; letter-spacing: 0.5px; }
-    .prod-acct-header::before { content: "▼ "; margin-right: 6px; display: inline-block; font-size: 11px; }
-    .prod-prog-header { background: var(--bg-subtle); font-weight: 500; font-size: 12px; color: var(--tx); padding: 10px 16px 10px 24px !important; border-bottom: 2px solid var(--border) !important; display: flex; align-items: center; gap: 8px; }
-    .prod-color-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .prod-table th { padding: 8px 10px; text-align: left; font-weight: 600; color: var(--tx); border-bottom: 2px solid var(--border); white-space: nowrap; }
+    .prod-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .prod-acct-header { background: transparent; font-weight: 600; font-size: 12px; color: var(--tx); padding: 10px 12px !important; cursor: pointer; user-select: none; border-bottom: 2px solid var(--border) !important; text-transform: uppercase; letter-spacing: 0.5px; }
+    .prod-acct-header::before { content: "▼ "; margin-right: 4px; display: inline-block; font-size: 10px; }
+    .prod-prog-header { background: var(--bg-subtle); font-weight: 500; font-size: 11px; color: var(--tx); padding: 7px 12px !important; border-bottom: 2px solid var(--border) !important; display: flex; align-items: center; gap: 6px; }
+    .prod-color-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
     .prod-prog-name { flex: 1; }
-    .prod-delivery-row td { background: transparent; }
+    .prod-delivery-row td { background: transparent; padding: 6px 8px; }
     .prod-table tbody tr:hover { background: var(--bg-hover); }
     .prod-table tbody tr.row-past { background: #F3F4F6; opacity: 0.7; }
-    .prod-input { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; font-family: inherit; background: var(--bg-app); color: var(--tx); }
+    .prod-input { width: 100%; padding: 4px 6px; border: 1px solid var(--border); border-radius: 3px; font-size: 11px; font-family: inherit; background: var(--bg-app); color: var(--tx); }
     .prod-input:hover { border-color: var(--t2); }
     .prod-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px var(--bg-app); }
     .prod-date-green { color: #059669; font-weight: 600; }
@@ -8384,8 +8384,6 @@ function renderProductionStatus() {
       <table class="prod-table">
         <thead>
           <tr>
-            <th style="width: 120px;">Account</th>
-            <th style="width: 140px;">Program</th>
             <th style="width: 200px;">Delivery Description</th>
             <th style="width: 100px;">Serial No.</th>
             <th style="width: 120px;">Contract Date</th>
@@ -8405,7 +8403,7 @@ function renderProductionStatus() {
 
       // Account group header
       html += `<tr>
-        <td colspan="7" class="prod-acct-header" style="border-bottom-color: ${acctColor};">
+        <td colspan="5" class="prod-acct-header" style="border-bottom-color: ${acctColor};">
           ${acctName} (${programNames.length} program${programNames.length !== 1 ? 's' : ''})
         </td>
       </tr>`;
@@ -8426,7 +8424,7 @@ function renderProductionStatus() {
 
         // Program group header
         html += `<tr>
-          <td colspan="7" class="prod-prog-header">
+          <td colspan="5" class="prod-prog-header">
             <div class="prod-color-dot" style="background-color: ${progColor};"></div>
             <span class="prod-prog-name">${progName}</span>
           </td>
@@ -8447,8 +8445,6 @@ function renderProductionStatus() {
           const rowClass = isPast ? 'row-past' : '';
 
           html += `<tr class="prod-delivery-row ${rowClass}">
-            <td></td>
-            <td></td>
             <td>
               <input type="text" class="prod-input" value="${del.description || ''}" placeholder="Add description"
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'description', this.value)">
