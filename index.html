@@ -8341,12 +8341,15 @@ function renderProductionStatus() {
     .prod-delivery-row td { background: transparent; padding: 5px 10px; }
     .prod-table tbody tr:hover { background: transparent; }
     .prod-table tbody tr.row-past { opacity: 1; }
-    .prod-input { width: 100%; padding: 4px 6px; border: 1px solid var(--border); border-radius: 3px; font-size: 12px; font-family: inherit; background: var(--bg-app); color: var(--tx); line-height: 1.4; }
+    .prod-input { width: 100%; padding: 4px 6px; border: 1px solid var(--border); border-radius: 3px; font-size: 12px; font-family: inherit; background: var(--bg-app); color: inherit; line-height: 1.4; }
+    .prod-delivery-row td { color: inherit; }
+    .prod-delivery-row .prod-input { color: inherit; }
     .prod-input:hover { border-color: var(--t2); }
     .prod-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px var(--bg-app); }
     .prod-date-green { color: #059669; font-weight: 600; }
     .prod-date-red { color: #DC2626; font-weight: 600; }
     .btn-delete { padding: 4px 8px; background: #EF4444; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight: 500; }
+    .prod-delivery-row.row-past .btn-delete { opacity: 0.5; cursor: not-allowed; }
     .prod-empty { text-align: center; padding: 60px 20px; color: var(--t3); }
     .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-box { background: var(--bg-card); border-radius: 8px; padding: 20px; min-width: 400px; border: 1px solid var(--border); }
@@ -8488,8 +8491,8 @@ function renderProductionStatus() {
               <input type="date" class="prod-input" value="${del.contractDate || ''}"
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'contractDate', this.value)">
             </td>
-            <td style="color: ${rowTextColor}; font-weight: ${actualDateNorm && !isDelivered ? '600' : '400'};">
-              <input type="date" class="prod-input" value="${del.actualDate || ''}" style="color: ${rowTextColor};"
+            <td style="font-weight: ${actualDateNorm && !isDelivered ? '600' : '400'};">
+              <input type="date" class="prod-input" value="${del.actualDate || ''}"
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'actualDate', this.value)">
             </td>
             <td style="text-align: center; display: flex; gap: 4px; justify-content: center;">
