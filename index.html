@@ -7130,6 +7130,12 @@ function handleImport(e){
 // ═══════════════════════════════════════════════════════════════════════════════
 function setView(v){
   hideModal();  // Close any open modals when switching views
+  closeCmdPalette();  // Close command palette if open
+  closeMobileSidebar();  // Close mobile sidebar if open
+  const columnMenu = document.getElementById('column-menu');
+  if(columnMenu) columnMenu.remove();  // Close column menu if open
+  const projFilterModal = document.getElementById('proj-filter-modal');
+  if(projFilterModal) projFilterModal.style.display = 'none';  // Close project filter modal if open
   state.view = v;
   sv(); render();
   window.scrollTo(0,0);
