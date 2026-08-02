@@ -3219,13 +3219,13 @@ function getFlagFilterBar(){
 
   return `<div style="display:flex;gap:8px;padding:10px 16px;align-items:center;background:#f9fafb;border-bottom:1px solid var(--silver2);flex-wrap:wrap">
     <span style="font-weight:600;font-size:13px;color:var(--t2)">Flags:</span>
-    <button class="flag-filter-btn ${u ? 'active' : ''}" onclick="state.flt.u=!state.flt.u;sv();renderMain()" title="Toggle Urgent filter">
+    <button class="flag-filter-btn ${u ? 'active' : ''}" onclick="state.flt.u=!state.flt.u;sv();render()" title="Toggle Urgent filter">
       ${lucideIcon('zap','14')} Urgent
     </button>
-    <button class="flag-filter-btn ${f ? 'active' : ''}" onclick="state.flt.f=!state.flt.f;sv();renderMain()" title="Toggle Follow-up filter">
+    <button class="flag-filter-btn ${f ? 'active' : ''}" onclick="state.flt.f=!state.flt.f;sv();render()" title="Toggle Follow-up filter">
       ${lucideIcon('message-circle','14')} Follow-up
     </button>
-    <button class="flag-filter-btn ${t ? 'active' : ''}" onclick="state.flt.t=!state.flt.t;sv();renderMain()" title="Toggle Today filter">
+    <button class="flag-filter-btn ${t ? 'active' : ''}" onclick="state.flt.t=!state.flt.t;sv();render()" title="Toggle Today filter">
       ${lucideIcon('sun','14')} Today
     </button>
     ${hasFilters ? `<div style="width:1px;height:20px;background:var(--silver2);margin:0 4px"></div><button class="flag-filter-btn clear-btn" onclick="clearAllFlags()" title="Clear all active flags">
@@ -4167,7 +4167,7 @@ function renderProjSummary(){
     <div id="proj-filter-modal" style="display:none;position:fixed;top:80px;right:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;z-index:50;min-width:220px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
       <div style="margin-bottom:14px">
         <label style="font-size:11px;color:var(--t2);font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Account</label>
-        <select onchange="state.selAcct=this.value||null;state.selProj=null;sv();renderMain();toggleProjectFilterModal()" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:3px;font-size:12px;background:var(--bg-app);color:var(--tx);cursor:pointer">
+        <select onchange="state.selAcct=this.value||null;state.selProj=null;sv();render();toggleProjectFilterModal()" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:3px;font-size:12px;background:var(--bg-app);color:var(--tx);cursor:pointer">
           <option value="" ${!state.selAcct?'selected':''}>📊 All</option>`;
   for(const a of state.accounts){
     html += `<option value="${a.id}" ${state.selAcct===a.id?'selected':''}>● ${esc(a.name)}</option>`;
@@ -4176,7 +4176,7 @@ function renderProjSummary(){
       </div>
       <div>
         <label style="font-size:11px;color:var(--t2);font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Project</label>
-        <select onchange="state.selProj=this.value||null;sv();renderMain();toggleProjectFilterModal()" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:3px;font-size:12px;background:var(--bg-app);color:var(--tx);cursor:pointer">
+        <select onchange="state.selProj=this.value||null;sv();render();toggleProjectFilterModal()" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:3px;font-size:12px;background:var(--bg-app);color:var(--tx);cursor:pointer">
           <option value="" ${!state.selProj?'selected':''}>📋 All</option>`;
   const projsForFilter = state.projects.filter(p => !state.selAcct || p.accountId === state.selAcct);
   for(const p of projsForFilter){
@@ -4674,7 +4674,7 @@ function renderProjInfoView(){
   if(state.accounts.length){
     projFilterHtml = `<div class="proj-summary-filters" style="position:sticky;top:56px;z-index:40;background:var(--bg-app);padding:12px 16px;border-bottom:1px solid var(--border)">
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <select class="proj-summary-filter" onchange="state.selAcct=this.value||null;state.selProj=null;sv();renderMain()" style="flex:1;min-width:200px">
+        <select class="proj-summary-filter" onchange="state.selAcct=this.value||null;state.selProj=null;sv();render()" style="flex:1;min-width:200px">
           <option value="">📊 Account: All</option>`;
     for(const a of state.accounts){
       projFilterHtml += `<option value="${a.id}" ${state.selAcct===a.id?'selected':''}style="padding-left:20px">● ${esc(a.name)}</option>`;
@@ -4682,7 +4682,7 @@ function renderProjInfoView(){
     projFilterHtml += `</select>`;
 
     const projsForFilter = state.projects.filter(p => !state.selAcct || p.accountId === state.selAcct);
-    projFilterHtml += `<select class="proj-summary-filter" onchange="state.selProj=this.value||null;sv();renderMain()" style="flex:1;min-width:200px">
+    projFilterHtml += `<select class="proj-summary-filter" onchange="state.selProj=this.value||null;sv();render()" style="flex:1;min-width:200px">
       <option value="">📋 Project: All</option>`;
     for(const p of projsForFilter){
       const acct = acctById(p.accountId);
@@ -7152,9 +7152,9 @@ function bindGlobalEvents(){
     const view = tab.dataset.view;
 
     // Toggle filters for flag buttons instead of switching view
-    if(view === 'today') { state.flt.t = !state.flt.t; sv(); renderMain(); }
-    else if(view === 'followup') { state.flt.f = !state.flt.f; sv(); renderMain(); }
-    else if(view === 'urgent') { state.flt.u = !state.flt.u; sv(); renderMain(); }
+    if(view === 'today') { state.flt.t = !state.flt.t; sv(); render(); }
+    else if(view === 'followup') { state.flt.f = !state.flt.f; sv(); render(); }
+    else if(view === 'urgent') { state.flt.u = !state.flt.u; sv(); render(); }
     else { setView(view); }
   });
 
