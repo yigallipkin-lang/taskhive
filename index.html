@@ -2709,6 +2709,7 @@ function restoreScrollPosition(){
 function render(){
   buildRenderCache();  // Build lookup maps once per render
   buildSortCache();    // Build sorted arrays once per render
+  console.log('🎨 render() called for view:', state.view);
   renderSidebar();
   renderTopBar();
   renderMain();
@@ -3107,25 +3108,26 @@ function renderProjBar(){
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 function renderMain(){
   const v = state.view;
-  if(v==='kanban') renderKanban();
-  else if(v==='table') renderTable();
-  else if(v==='repair-status') renderRepairStatus();
-  else if(v==='proj-summary') renderProjSummary();
-  else if(v==='projinfo') renderProjInfoView();
-  else if(v==='project-info') renderProjectInfoDashboard();
-  else if(v==='project-list') renderProjectList();
-  else if(v==='upcoming-topics') renderUpcomingTopicsTable();
-  else if(v==='production-status') renderProductionStatus();
-  else if(v==='archived-projects') renderArchivedProjects();
-  else if(v==='today') renderSmartList('today');
-  else if(v==='followup') renderSmartList('followup');
-  else if(v==='urgent') renderSmartList('urgent');
-  else if(v==='overdue') renderSmartList('overdue');
-  else if(v==='archive') renderCompletedTable();
-  else if(v==='hidden') renderHiddenTable();
-  else if(v==='snoozed') renderSnoozedTable();
-  else if(v.startsWith('p:')) renderProjectDetail(v.slice(2));
-  else renderKanban();
+  console.log('📍 renderMain routing to view:', v);
+  if(v==='kanban') { console.log('📊 Rendering Kanban'); renderKanban(); }
+  else if(v==='table') { console.log('📋 Rendering Table'); renderTable(); }
+  else if(v==='repair-status') { console.log('🔧 Rendering Repair Status'); renderRepairStatus(); }
+  else if(v==='proj-summary') { console.log('📈 Rendering Project Summary'); renderProjSummary(); }
+  else if(v==='projinfo') { console.log('ℹ️ Rendering Project Info View'); renderProjInfoView(); }
+  else if(v==='project-info') { console.log('📊 Rendering Project Info Dashboard'); renderProjectInfoDashboard(); }
+  else if(v==='project-list') { console.log('📑 Rendering Project List'); renderProjectList(); }
+  else if(v==='upcoming-topics') { console.log('💬 Rendering Upcoming Topics'); renderUpcomingTopicsTable(); }
+  else if(v==='production-status') { console.log('📦 Rendering Production Status'); renderProductionStatus(); }
+  else if(v==='archived-projects') { console.log('📚 Rendering Archived Projects'); renderArchivedProjects(); }
+  else if(v==='today') { console.log('☀️ Rendering Today'); renderSmartList('today'); }
+  else if(v==='followup') { console.log('💬 Rendering Follow-up'); renderSmartList('followup'); }
+  else if(v==='urgent') { console.log('⚡ Rendering Urgent'); renderSmartList('urgent'); }
+  else if(v==='overdue') { console.log('⏰ Rendering Overdue'); renderSmartList('overdue'); }
+  else if(v==='archive') { console.log('✅ Rendering Completed Tasks'); renderCompletedTable(); }
+  else if(v==='hidden') { console.log('👁️ Rendering Hidden Tasks'); renderHiddenTable(); }
+  else if(v==='snoozed') { console.log('⏲️ Rendering Snoozed Tasks'); renderSnoozedTable(); }
+  else if(v.startsWith('p:')) { console.log('🗂️ Rendering Project Detail:', v.slice(2)); renderProjectDetail(v.slice(2)); }
+  else { console.log('⚙️ Default to Kanban'); renderKanban(); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -5113,7 +5115,13 @@ function renderProjectInfoDashboard(){
   });
 
   html += `</div>`;
-  updateDOM('main', html, 'main');
+  const mainEl = document.getElementById('main');
+  if(mainEl) {
+    mainEl.innerHTML = html;
+    console.log('✅ Project Info Dashboard rendered');
+  } else {
+    console.error('❌ Main element not found for Project Info Dashboard');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -7519,7 +7527,9 @@ async function init(){
       // Handle view changes
       const viewBtn = e.target.closest('[data-sidebar-view]');
       if(viewBtn) {
+        e.stopPropagation();
         const view = viewBtn.dataset.sidebarView;
+        console.log('🔄 Switching view to:', view);
         setView(view);
         closeMobileSidebar();
         return;
