@@ -8460,20 +8460,22 @@ function renderProductionStatus() {
             contractDateNorm.setHours(0, 0, 0, 0);
           }
 
-          // Check if actual/planned date is before today
-          const isPast = actualDateNorm && actualDateNorm < today;
+          // Check if actual/planned date is before today (delivered)
+          const isDelivered = actualDateNorm && actualDateNorm < today;
 
-          // Determine date status color (green if on-time, red if late)
-          let dateStatusColor = '#666'; // default gray
-          if (actualDateNorm && contractDateNorm) {
-            dateStatusColor = actualDateNorm <= contractDateNorm ? '#059669' : '#DC2626';
+          // Determine text color based on delivery status
+          let rowTextColor = '#333'; // default dark text
+          if (isDelivered) {
+            // Past date: entire row gray (delivered)
+            rowTextColor = '#999';
+          } else if (actualDateNorm && contractDateNorm) {
+            // Future date: green if on-time, red if late
+            rowTextColor = actualDateNorm <= contractDateNorm ? '#059669' : '#DC2626';
           }
 
-          // Row background: gray if past, white otherwise
-          const rowBgColor = isPast ? '#F3F4F6' : 'transparent';
-          const rowClass = isPast ? 'row-past' : '';
+          const rowClass = isDelivered ? 'row-past' : '';
 
-          html += `<tr class="prod-delivery-row ${rowClass}" style="background-color: ${rowBgColor};">
+          html += `<tr class="prod-delivery-row ${rowClass}" style="color: ${rowTextColor};">
             <td>
               <input type="text" class="prod-input" value="${del.description || ''}" placeholder="Add description"
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'description', this.value)">
@@ -8486,8 +8488,8 @@ function renderProductionStatus() {
               <input type="date" class="prod-input" value="${del.contractDate || ''}"
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'contractDate', this.value)">
             </td>
-            <td style="color: ${dateStatusColor}; font-weight: ${actualDateNorm ? '600' : '400'};">
-              <input type="date" class="prod-input" value="${del.actualDate || ''}" style="color: ${dateStatusColor};"
+            <td style="color: ${rowTextColor}; font-weight: ${actualDateNorm && !isDelivered ? '600' : '400'};">
+              <input type="date" class="prod-input" value="${del.actualDate || ''}" style="color: ${rowTextColor};"
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'actualDate', this.value)">
             </td>
             <td style="text-align: center; display: flex; gap: 4px; justify-content: center;">
