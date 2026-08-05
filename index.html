@@ -3478,9 +3478,9 @@ function renderTable(){
 
     // Render all tasks in flat table
     for(const { task: t, account: a, project: p } of allTasks){
-      const todayHtml = `<div style="display:flex;align-items:center;justify-content:center">
-        ${t.today ? `<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','14')}</span>` : ''}
-      </div>`;
+      const todayHtml = `<button onclick="event.stopPropagation();toggleToday('${t.id}')" title="Toggle Today" style="background:${t.today?'#F59E0B':'#F3F4F6'};border:none;color:${t.today?'#FFFFFF':'#9CA3AF'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="today-btn" onmouseover="this.style.background='${t.today?'#D97706':'#E5E7EB'}';this.style.color='${t.today?'#FFFFFF':'#6B7280'}';this.style.boxShadow='${t.today?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.background='${t.today?'#F59E0B':'#F3F4F6'}';this.style.color='${t.today?'#FFFFFF':'#9CA3AF'}';this.style.boxShadow='${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
+        ${lucideIcon('sun','18')}
+      </button>`;
 
       html += `<tr class="task-row-styled" data-task-id="${t.id}">
         <td style="font-size:12px;color:${esc(a.color)};font-weight:500">${esc(a.name)}</td>
@@ -3490,7 +3490,7 @@ function renderTable(){
         </td>
         <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
           <button onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:${t.done?'#10B981':'#F3F4F6'};border:none;color:${t.done?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.done?'#059669':'#E5E7EB'}';this.style.boxShadow='${t.done?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.background='${t.done?'#10B981':'#F3F4F6'}';this.style.boxShadow='${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
-            ${lucideIcon(t.done?'check':'square','16')}
+            ${lucideIcon(t.done?'check-circle-2':'circle','16')}
           </button>
           <button onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:${t.hidden?'#F59E0B':'#F3F4F6'};border:none;color:${t.hidden?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.hidden?'#D97706':'#E5E7EB'}';this.style.boxShadow='${t.hidden?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.background='${t.hidden?'#F59E0B':'#F3F4F6'}';this.style.boxShadow='${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
             ${lucideIcon(t.hidden?'eye-off':'eye','16')}
@@ -3515,7 +3515,7 @@ function renderTable(){
           </td>
           <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
             <button onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')" title="Complete" style="background:${s.done?'#10B981':'#F3F4F6'};border:none;color:${s.done?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${s.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${s.done?'#059669':'#E5E7EB'}';this.style.boxShadow='${s.done?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.background='${s.done?'#10B981':'#F3F4F6'}';this.style.boxShadow='${s.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
-              ${lucideIcon(s.done?'check':'square','16')}
+              ${lucideIcon(s.done?'check-circle-2':'circle','16')}
             </button>
           </td>
           <td></td>
@@ -6371,6 +6371,18 @@ function toggleSnoozed(id){
     history.push(`Snoozed task: ${t.title} for 2 weeks`, state);
     t.snoozedAt = Date.now();
   }
+  t.updated = Date.now();
+  sv();
+  syncTaskToFirebase(t);
+  saveScrollPosition();
+  render();
+  restoreScrollPosition();
+}
+
+function toggleToday(id){
+  const t = taskById(id); if(!t) return;
+  history.push(`${t.today ? 'Remove from' : 'Add to'} Today: ${t.title}`, state);
+  t.today = !t.today;
   t.updated = Date.now();
   sv();
   syncTaskToFirebase(t);
