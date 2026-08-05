@@ -3479,7 +3479,7 @@ function renderTable(){
     // Render all tasks in flat table
     for(const { task: t, account: a, project: p } of allTasks){
       const todayHtml = `<button onclick="event.stopPropagation();toggleToday('${t.id}')" title="Toggle Today" style="background:${t.today?'#F59E0B':'#F3F4F6'};border:none;color:${t.today?'#FFFFFF':'#9CA3AF'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="today-btn" onmouseover="this.style.background='${t.today?'#D97706':'#E5E7EB'}';this.style.color='${t.today?'#FFFFFF':'#6B7280'}';this.style.boxShadow='${t.today?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.background='${t.today?'#F59E0B':'#F3F4F6'}';this.style.color='${t.today?'#FFFFFF':'#9CA3AF'}';this.style.boxShadow='${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
-        ${lucideIcon('sun','18')}
+        ${lucideIcon('sun','14')}
       </button>`;
 
       html += `<tr class="task-row-styled" data-task-id="${t.id}">
@@ -3490,13 +3490,13 @@ function renderTable(){
         </td>
         <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
           <button onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:${t.done?'#10B981':'#F3F4F6'};border:none;color:${t.done?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.done?'#059669':'#E5E7EB'}';this.style.boxShadow='${t.done?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.background='${t.done?'#10B981':'#F3F4F6'}';this.style.boxShadow='${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
-            ${lucideIcon(t.done?'check-circle-2':'circle','16')}
+            ${lucideIcon(t.done?'check-circle-2':'circle','13')}
           </button>
           <button onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:${t.hidden?'#F59E0B':'#F3F4F6'};border:none;color:${t.hidden?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.hidden?'#D97706':'#E5E7EB'}';this.style.boxShadow='${t.hidden?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.background='${t.hidden?'#F59E0B':'#F3F4F6'}';this.style.boxShadow='${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
-            ${lucideIcon(t.hidden?'eye-off':'eye','16')}
+            ${lucideIcon(t.hidden?'eye-off':'eye','13')}
           </button>
           <button onclick="event.stopPropagation();toggleSnoozed('${t.id}')" title="Snooze" style="background:${t.snoozedAt?'#3B82F6':'#F3F4F6'};border:none;color:${t.snoozedAt?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.snoozedAt?'0 2px 4px rgba(59,130,246,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.snoozedAt?'#2563EB':'#E5E7EB'}';this.style.boxShadow='${t.snoozedAt?'0 4px 8px rgba(59,130,246,0.3)':'none'}'" onmouseout="this.style.background='${t.snoozedAt?'#3B82F6':'#F3F4F6'}';this.style.boxShadow='${t.snoozedAt?'0 2px 4px rgba(59,130,246,0.2)':'none'}'">
-            ${lucideIcon(t.snoozedAt?'clock':'clock','16')}
+            ${lucideIcon(t.snoozedAt?'clock':'clock','13')}
           </button>
         </td>
         <td style="text-align:center">${todayHtml}</td>
@@ -6386,9 +6386,17 @@ function toggleToday(id){
   t.updated = Date.now();
   sv();
   syncTaskToFirebase(t);
-  saveScrollPosition();
-  render();
-  restoreScrollPosition();
+  // Update DOM without reordering - just toggle the today button styling
+  const row = document.querySelector(`tr[data-task-id="${id}"]`);
+  if(row){
+    const todayBtn = row.querySelector('.today-btn');
+    if(todayBtn){
+      const isActive = t.today;
+      todayBtn.style.background = isActive ? '#F59E0B' : '#F3F4F6';
+      todayBtn.style.color = isActive ? '#FFFFFF' : '#9CA3AF';
+      todayBtn.style.boxShadow = isActive ? '0 2px 4px rgba(245,158,11,0.2)' : 'none';
+    }
+  }
 }
 
 function toggleSubtaskDone(taskId, subId){
