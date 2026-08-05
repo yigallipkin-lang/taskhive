@@ -8422,6 +8422,7 @@ function renderProductionStatus() {
             <th style="width: 120px;">Contract Date</th>
             <th style="width: 140px;">Planned/Actual</th>
             <th style="width: 120px;">Status</th>
+            <th style="width: 130px;">Location</th>
             <th style="width: 85px; text-align: center;">Action</th>
           </tr>
         </thead>
@@ -8440,7 +8441,7 @@ function renderProductionStatus() {
       const isCollapsed = window.prodCollapsed && window.prodCollapsed[acctId];
       const arrowDir = isCollapsed ? '▶' : '▼';
       html += `<tr>
-        <td colspan="6" class="prod-acct-header" onclick="toggleProdAcctCollapse('${acctId}')" style="border-bottom-color: ${acctColor}; cursor: pointer;">
+        <td colspan="7" class="prod-acct-header" onclick="toggleProdAcctCollapse('${acctId}')" style="border-bottom-color: ${acctColor}; cursor: pointer;">
           <span class="prod-acct-arrow">${arrowDir}</span> ${acctName} (${programNames.length} program${programNames.length !== 1 ? 's' : ''})
         </td>
       </tr>`;
@@ -8462,7 +8463,7 @@ function renderProductionStatus() {
 
         // Program group header
         html += `<tr>
-          <td colspan="6" class="prod-prog-header">
+          <td colspan="7" class="prod-prog-header">
             <div class="prod-color-dot" style="background-color: ${progColor};"></div>
             <span class="prod-prog-name">${progName}</span>
           </td>
@@ -8542,6 +8543,10 @@ function renderProductionStatus() {
             </td>
             <td style="text-align: center; font-weight: 600; color: ${statusColor};">
               ${statusText}
+            </td>
+            <td>
+              <input type="text" class="prod-input" value="${del.location || ''}" placeholder="Location"
+                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'location', this.value)">
             </td>
             <td style="text-align: center; display: flex; gap: 4px; justify-content: center;">
               <button class="btn-delete" onclick="duplicateDelivery('${del.projectId}', '${del.id}')" style="background: #3B82F6;">Duplicate</button>
