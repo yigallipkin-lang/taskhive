@@ -8401,6 +8401,7 @@ function renderProductionStatus() {
             <th style="width: 70px;">Serial No.</th>
             <th style="width: 85px;">Contract Date</th>
             <th style="width: 95px;">Planned/Actual</th>
+            <th style="width: 75px;">Status</th>
             <th style="width: 65px; text-align: center;">Action</th>
           </tr>
         </thead>
@@ -8419,7 +8420,7 @@ function renderProductionStatus() {
       const isCollapsed = window.prodCollapsed && window.prodCollapsed[acctId];
       const arrowDir = isCollapsed ? '▶' : '▼';
       html += `<tr>
-        <td colspan="5" class="prod-acct-header" onclick="toggleProdAcctCollapse('${acctId}')" style="border-bottom-color: ${acctColor}; cursor: pointer;">
+        <td colspan="6" class="prod-acct-header" onclick="toggleProdAcctCollapse('${acctId}')" style="border-bottom-color: ${acctColor}; cursor: pointer;">
           <span class="prod-acct-arrow">${arrowDir}</span> ${acctName} (${programNames.length} program${programNames.length !== 1 ? 's' : ''})
         </td>
       </tr>`;
@@ -8441,7 +8442,7 @@ function renderProductionStatus() {
 
         // Program group header
         html += `<tr>
-          <td colspan="5" class="prod-prog-header">
+          <td colspan="6" class="prod-prog-header">
             <div class="prod-color-dot" style="background-color: ${progColor};"></div>
             <span class="prod-prog-name">${progName}</span>
           </td>
@@ -8466,14 +8467,27 @@ function renderProductionStatus() {
           // Check if actual/planned date is before today (delivered)
           const isDelivered = actualDateNorm && actualDateNorm < today;
 
-          // Determine text color based on delivery status
+          // Determine text color and status based on delivery status
           let rowTextColor = '#333'; // default dark text
+          let statusText = '';
+          let statusColor = '#333';
+
           if (isDelivered) {
             // Past date: entire row gray (delivered)
             rowTextColor = '#999';
+            statusText = 'Delivered';
+            statusColor = '#999';
           } else if (actualDateNorm && contractDateNorm) {
             // Future date: green if on-time, red if late
-            rowTextColor = actualDateNorm <= contractDateNorm ? '#059669' : '#DC2626';
+            if (actualDateNorm <= contractDateNorm) {
+              rowTextColor = '#059669';
+              statusText = 'On-time';
+              statusColor = '#059669';
+            } else {
+              rowTextColor = '#DC2626';
+              statusText = 'Late';
+              statusColor = '#DC2626';
+            }
           }
 
           const rowClass = isDelivered ? 'row-past' : '';
@@ -8494,6 +8508,9 @@ function renderProductionStatus() {
             <td style="font-weight: ${actualDateNorm && !isDelivered ? '600' : '400'};">
               <input type="date" class="prod-input" value="${del.actualDate || ''}"
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'actualDate', this.value)">
+            </td>
+            <td style="text-align: center; font-weight: 600; color: ${statusColor};">
+              ${statusText}
             </td>
             <td style="text-align: center; display: flex; gap: 4px; justify-content: center;">
               <button class="btn-delete" onclick="duplicateDelivery('${del.projectId}', '${del.id}')" style="background: #3B82F6;">Duplicate</button>
