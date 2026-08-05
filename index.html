@@ -3457,10 +3457,10 @@ function renderTable(){
     .task-table-styled thead { background: transparent; }
     .task-table-styled th { padding: 5px 10px; text-align: left; font-weight: 600; color: var(--tx); background: transparent; border-bottom: 1px solid #D1D5DB; white-space: nowrap; border-top: 1px solid #D1D5DB; font-size: 12px; }
     .task-table-styled td { padding: 5px 10px; border-bottom: 1px solid #E5E7EB; vertical-align: middle; }
-    .acct-header { background: transparent; font-weight: 600; font-size: 12px; color: var(--tx); padding: 5px 10px !important; cursor: pointer; user-select: none; border-bottom: 1px solid #E5E7EB !important; border-top: 2px solid #D1D5DB !important; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
+    .acct-header { background: transparent; font-weight: 600; font-size: 13px; color: var(--tx); padding: 5px 10px !important; cursor: pointer; user-select: none; border-bottom: 1px solid #E5E7EB !important; border-top: 2px solid #D1D5DB !important; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
     .acct-header:hover { background: #FAFAFA; }
     .acct-arrow { display: inline-block; width: 10px; margin-right: 4px; font-size: 9px; transition: transform 0.2s; color: #6B7280; }
-    .proj-header { background: transparent; font-weight: 500; font-size: 11px; color: var(--tx); padding: 4px 10px !important; border-bottom: 1px solid #E5E7EB !important; border-top: none !important; display: flex; align-items: center; gap: 6px; }
+    .proj-header { background: transparent; font-weight: 500; font-size: 12px; color: var(--tx); padding: 4px 10px !important; border-bottom: 1px solid #E5E7EB !important; border-top: none !important; display: flex; align-items: center; gap: 6px; }
     .color-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
     .proj-name { flex: 1; }
     .task-row-styled td { background: transparent; padding: 5px 10px; }
@@ -3555,7 +3555,7 @@ function renderTable(){
 
             html += `<tr class="task-row-styled" data-task-id="${t.id}">
               <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
-                <span style="font-size:13px;color:var(--tx);font-weight:500">${esc(t.title)}</span>
+                <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
               </td>
               <td style="text-align:center">
                 <div class="cb ${t.done?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')" style="margin:auto"></div>
