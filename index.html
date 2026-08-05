@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.9.3">
+<meta name="version" content="2.10.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -410,11 +410,7 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .filter-chips{display:flex;gap:6px;padding:10px 16px 4px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg-app);z-index:50}
 .chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);color:var(--t3);cursor:pointer;transition:all .12s;background:var(--bg-card)}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
-.chip.active.urgent{background:#FEE2E2;border-color:var(--rd);color:var(--rd)}
-.chip.active.followup{background:#EFF6FF;border-color:var(--bl);color:var(--bl)}
 .chip.active.today{background:#ECFDF5;border-color:var(--gn);color:var(--gn)}
-[data-theme="dark"] .chip.active.urgent{background:rgba(239,68,68,.15);color:#FCA5A5}
-[data-theme="dark"] .chip.active.followup{background:rgba(59,130,246,.15);color:#93C5FD}
 [data-theme="dark"] .chip.active.today{background:rgba(16,185,129,.15);color:#6EE7B7}
 /* ── CARDS ───────────────────────────────────────────────────── */
 .task-card{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid #d0d0d0;border-radius:var(--radius);padding:10px 14px;margin-bottom:6px;cursor:pointer;transition:all .15s cubic-bezier(0.34,1.56,0.64,1);position:relative;box-shadow:var(--s1);overflow:hidden;animation:slideLeft .3s ease-out}
@@ -425,16 +421,10 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .card-title.done-text{text-decoration:line-through;color:var(--mu)}
 .card-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:10px;color:var(--mu)}
 .flag-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.flag-urgent{background:var(--red)}
-.flag-followup{background:var(--blu)}
 .flag-today{background:var(--grn)}
 /* Flag badges with icons */
 .flag-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;flex-shrink:0}
-.flag-badge-urgent{background:#FEE2E2;color:var(--red);border:1px solid #FECACA}
-.flag-badge-followup{background:#EFF6FF;color:var(--blu);border:1px solid #BFDBFE}
 .flag-badge-today{background:#ECFDF5;color:var(--grn);border:1px solid #A7F3D0}
-[data-theme="dark"] .flag-badge-urgent{background:rgba(239,68,68,.15);color:#FCA5A5;border-color:rgba(239,68,68,.3)}
-[data-theme="dark"] .flag-badge-followup{background:rgba(59,130,246,.15);color:#93C5FD;border-color:rgba(59,130,246,.3)}
 [data-theme="dark"] .flag-badge-today{background:rgba(16,185,129,.15);color:#6EE7B7;border-color:rgba(16,185,129,.3)}
 .sub-progress{font-size:11px;color:var(--mu)}
 .subtask-preview{margin-top:3px;padding-top:3px;border-top:1px solid var(--silver2);font-size:10px}
@@ -461,9 +451,7 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .collapse-toggle:hover{color:var(--tx);background:var(--silver3);border-radius:4px}
 .lucide-icon{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0}
 .lucide-icon svg{width:1em;height:1em}
-.urgent-badge .lucide-icon svg{color:var(--red)}
 .today-badge .lucide-icon svg{color:var(--grn)}
-.followup-badge .lucide-icon svg{color:var(--blu)}
 .kanban-cols{display:flex;flex-direction:column;gap:12px;overflow:visible;padding-bottom:8px;flex:1}
 .kanban-cols::-webkit-scrollbar{width:4px}
 .kanban-cols::-webkit-scrollbar-thumb{background:var(--honey-mid);border-radius:2px}
@@ -715,11 +703,7 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .color-swatch.selected{border:3px solid var(--orange);transform:scale(1.15)}
 .toggle-row{display:flex;gap:8px;margin-top:4px}
 .toggle-btn{flex:1;padding:7px;border-radius:var(--radius);font-size:13px;font-weight:600;border:1px solid var(--border);color:var(--t3);background:var(--bg-card);transition:all .12s}
-.toggle-btn.on-urgent{background:#FEE2E2;border-color:var(--rd);color:var(--rd)}
-.toggle-btn.on-followup{background:#EFF6FF;border-color:var(--bl);color:var(--bl)}
 .toggle-btn.on-today{background:#ECFDF5;border-color:var(--gn);color:var(--gn)}
-[data-theme="dark"] .toggle-btn.on-urgent{background:rgba(239,68,68,.15);color:#FCA5A5;border-color:rgba(239,68,68,.3)}
-[data-theme="dark"] .toggle-btn.on-followup{background:rgba(59,130,246,.15);color:#93C5FD;border-color:rgba(59,130,246,.3)}
 [data-theme="dark"] .toggle-btn.on-today{background:rgba(16,185,129,.15);color:#6EE7B7;border-color:rgba(16,185,129,.3)}
 .subtask-list{margin-top:4px}
 .subtask-list .subtask-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
@@ -729,8 +713,6 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .subtask-del:hover{opacity:1}
 .sub-flags{display:flex;gap:2px;flex-shrink:0}
 .flag-btn{padding:3px 6px;border-radius:4px;border:1px solid var(--silver2);background:var(--sf);color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
-.flag-btn.on-urgent{background:#FEE2E2;border-color:var(--red);color:var(--red)}
-.flag-btn.on-followup{background:#EFF6FF;border-color:var(--blu);color:var(--blu)}
 .flag-btn.on-today{background:#ECFDF5;border-color:var(--grn);color:var(--grn)}
 .btn-add-sub{font-size:12px;color:var(--honey-d);font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px}
 .modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--silver2)}
@@ -813,8 +795,6 @@ button:disabled{opacity:0.5;cursor:not-allowed}
 /* ── BANNER ──────────────────────────────────────────────────── */
 .filter-banner{padding:6px 16px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
 .banner-today{background:#ECFDF5;color:var(--grn)}
-.banner-followup{background:#EFF6FF;color:var(--blu)}
-.banner-urgent{background:#FEE2E2;color:var(--red)}
 /* ── EMPTY STATE ─────────────────────────────────────────────── */
 .empty-state{text-align:center;padding:64px 24px;color:var(--t3)}
 .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
@@ -1219,10 +1199,8 @@ button:disabled{opacity:0.5;cursor:not-allowed}
   /* Project List View - Landscape */
   #app[data-view="project-list"] @page{size:A4 landscape;margin:1cm}
 
-  /* Smart Lists (Today, Urgent, Followup, etc.) - Portrait */
+  /* Smart Lists (Today, etc.) - Portrait */
   #app[data-view="today"] @page,
-  #app[data-view="urgent"] @page,
-  #app[data-view="followup"] @page,
   #app[data-view="overdue"] @page,
   #app[data-view="archive"] @page{size:A4 portrait;margin:1cm}
 
@@ -1569,9 +1547,7 @@ function advanceDate(date, rec){
 
 function badgeCounts(){
   return {
-    today: state.tasks.filter(t=>!t.done&&t.today).length,
-    followup: state.tasks.filter(t=>!t.done&&t.followup).length,
-    urgent: state.tasks.filter(t=>!t.done&&t.urgent).length
+    today: state.tasks.filter(t=>!t.done&&t.today).length
   };
 }
 
@@ -1627,8 +1603,6 @@ function fmtDateRange(startDate, endDate){
 
 function flagDots(t){
   let s='';
-  if(t.urgent) s+=`<span class="flag-badge flag-badge-urgent" title="Urgent">${lucideIcon('zap','11')}</span>`;
-  if(t.followup) s+=`<span class="flag-badge flag-badge-followup" title="Follow-up">${lucideIcon('message-circle','11')}</span>`;
   if(t.today) s+=`<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','11')}</span>`;
   return `<div style="display:flex;align-items:center;justify-content:center;gap:3px">${s}</div>`;
 }
@@ -2454,10 +2428,8 @@ function setupCloud(){
 // ═══════════════════════════════════════════════════════════════════════════════
 function parseQuickAdd(raw, ctxProjId){
   let title = raw.trim();
-  let out = { title:'', projectId:ctxProjId||null, urgent:false, followup:false, today:false };
+  let out = { title:'', projectId:ctxProjId||null, today:false };
   // Extract flags
-  if(/\s!/.test(title)||title.startsWith('!')){ out.urgent=true; title=title.replace(/\s*!/g,'').trim(); }
-  if(/\s@/.test(title)||title.startsWith('@')){ out.followup=true; title=title.replace(/\s*@\S*/g,'').trim(); }
   const todayMatch = title.match(/#today/i);
   if(todayMatch){ out.today=true; title=title.replace(/#today/gi,'').trim(); }
   const pMatch = title.match(/\bp:(\S+)/);
@@ -2747,8 +2719,6 @@ function renderSidebar(){
   ];
   const flagItems = [
     {id:'today',label:'Today',icon:'sun',count:bc.today,flag:'t',color:'var(--gn)'},
-    {id:'followup',label:'Follow-up',icon:'message-circle',count:bc.followup,flag:'f',color:'var(--bl)'},
-    {id:'urgent',label:'Urgent',icon:'alert-circle',count:bc.urgent,flag:'u',color:'var(--rd)'},
   ];
 
   const viewsHtml = viewItems.map(v=>{
@@ -2828,8 +2798,7 @@ function renderSidebar(){
 function renderTopBar(){
   const viewNames = {
     kanban:'Board', table:'Table', 'proj-summary':'Projects Summary', 'project-info':'Project Info',
-    today:'Today', followup:'Follow-up',
-    urgent:'Urgent', archive:'Archive'
+    today:'Today', archive:'Archive'
   };
   const v = state.view;
   const title = v.startsWith('p:') ? (projById(v.slice(2))?.name||'Project') : (viewNames[v]||'TaskHive');
@@ -3036,8 +3005,6 @@ function renderTopNav(){
     null,
     {id:'all',label:'All Tasks',icon:'list'},
     {id:'today',label:'Today',b:badge(bc.today,'amber'),icon:'sun'},
-    {id:'followup',label:'Follow-up',b:badge(bc.followup,''),icon:'message-circle'},
-    {id:'urgent',label:'Urgent',b:badge(bc.urgent,''),icon:'alert-circle'},
     {id:'archive',label:'Archive',icon:'inbox'}
   ];
   const curView = state.view.startsWith('p:') ? '' : state.view;
@@ -3046,8 +3013,6 @@ function renderTopNav(){
     let active = '';
     // For flag filter buttons, check if the filter is active
     if(tab.id === 'today') active = state.flt.t ? 'active' : '';
-    else if(tab.id === 'followup') active = state.flt.f ? 'active' : '';
-    else if(tab.id === 'urgent') active = state.flt.u ? 'active' : '';
     // For other tabs, check if they match the current view
     else active = tab.id===curView ? 'active' : '';
     const iconHtml = tab.icon ? lucideIcon(tab.icon, '18') : '';
@@ -3120,8 +3085,6 @@ function renderMain(){
   else if(v==='production-status') { console.log('📦 Rendering Production Status'); renderProductionStatus(); }
   else if(v==='archived-projects') { console.log('📚 Rendering Archived Projects'); renderArchivedProjects(); }
   else if(v==='today') { console.log('☀️ Rendering Today'); renderSmartList('today'); }
-  else if(v==='followup') { console.log('💬 Rendering Follow-up'); renderSmartList('followup'); }
-  else if(v==='urgent') { console.log('⚡ Rendering Urgent'); renderSmartList('urgent'); }
   else if(v==='overdue') { console.log('⏰ Rendering Overdue'); renderSmartList('overdue'); }
   else if(v==='archive') { console.log('✅ Rendering Completed Tasks'); renderCompletedTable(); }
   else if(v==='hidden') { console.log('👁️ Rendering Hidden Tasks'); renderHiddenTable(); }
@@ -3175,8 +3138,6 @@ function taskCardHtml(t, opts={}){
 // ═══════════════════════════════════════════════════════════════════════════════
 function subtaskCardHtml(s){
   const flagHtml = `
-    ${s.urgent ? '<span class="flag-dot flag-urgent" title="Urgent"></span>' : ''}
-    ${s.followup ? '<span class="flag-dot flag-followup" title="Follow-up"></span>' : ''}
     ${s.today ? '<span class="flag-dot flag-today" title="Today"></span>' : ''}
   `;
   return `<div class="subtask-item ${s.done?'done-text':''}">
@@ -3202,31 +3163,21 @@ function filterTasks(tasks){
       return !t.snoozedAt;
     });
   }
-  if(state.flt.u) res = res.filter(t=>t.urgent || (t.subs && t.subs.some(s=>s.urgent)));
-  if(state.flt.f) res = res.filter(t=>t.followup || (t.subs && t.subs.some(s=>s.followup)));
   if(state.flt.t) res = res.filter(t=>(isToday(t)||t.today) || (t.subs && t.subs.some(s=>s.today||isToday(s))));
   return res;
 }
 
 function getActiveBanner(){
   if(state.view==='today') return `<div class="filter-banner banner-today">${lucideIcon('sun','20')} Today</div>`;
-  if(state.view==='followup') return `<div class="filter-banner banner-followup">${lucideIcon('message-circle','20')} Follow-up</div>`;
-  if(state.view==='urgent') return `<div class="filter-banner banner-urgent">${lucideIcon('alert-circle','20')} Urgent</div>`;
   return '';
 }
 
 function getFlagFilterBar(){
-  const {u,f,t} = state.flt;
-  const hasFilters = u || f || t;
+  const {t} = state.flt;
+  const hasFilters = t;
 
   return `<div style="display:flex;gap:8px;padding:10px 16px;align-items:center;background:#f9fafb;border-bottom:1px solid var(--silver2);flex-wrap:wrap">
     <span style="font-weight:600;font-size:13px;color:var(--t2)">Flags:</span>
-    <button class="flag-filter-btn ${u ? 'active' : ''}" onclick="state.flt.u=!state.flt.u;sv();render()" title="Toggle Urgent filter">
-      ${lucideIcon('zap','14')} Urgent
-    </button>
-    <button class="flag-filter-btn ${f ? 'active' : ''}" onclick="state.flt.f=!state.flt.f;sv();render()" title="Toggle Follow-up filter">
-      ${lucideIcon('message-circle','14')} Follow-up
-    </button>
     <button class="flag-filter-btn ${t ? 'active' : ''}" onclick="state.flt.t=!state.flt.t;sv();render()" title="Toggle Today filter">
       ${lucideIcon('sun','14')} Today
     </button>
@@ -3241,7 +3192,7 @@ function renderKanban(){
   if(state.selAcct) accounts = accounts.filter(a=>a.id===state.selAcct);
 
   // Check if filter chips are active
-  const hasFilters = state.flt.u || state.flt.f || state.flt.t || state.flt.s;
+  const hasFilters = state.flt.t || state.flt.s;
   const curView = state.view;
   const td = todayStr();
 
@@ -3249,16 +3200,12 @@ function renderKanban(){
     if(t.hidden) return false; // Always exclude hidden tasks
     if(t.snoozedAt) return false; // Always exclude snoozed tasks
     if(curView==='today') return !t.done&&(t.today||t.due===td);
-    if(curView==='followup') return !t.done&&t.followup;
-    if(curView==='urgent') return !t.done&&t.urgent;
     return !t.done;
   }
 
   // Function to check if task matches ALL active filter chips
   function matchesAllFilters(t){
     if(!t || t.done || t.hidden || t.snoozedAt) return false; // Always exclude hidden and snoozed tasks
-    if(state.flt.u && !t.urgent) return false;
-    if(state.flt.f && !t.followup) return false;
     if(state.flt.t && !(t.today || t.due === td)) return false;
     return true;
   }
@@ -3294,12 +3241,8 @@ function renderKanban(){
       }
 
       tasks.sort((a,b)=>{
-        if(a.urgent && !b.urgent) return -1;
-        if(!a.urgent && b.urgent) return 1;
         if(a.today && !b.today) return -1;
         if(!a.today && b.today) return 1;
-        if(a.followup && !b.followup) return -1;
-        if(!a.followup && b.followup) return 1;
         return 0;
       });
 
@@ -3483,12 +3426,8 @@ function renderTable(){
     for(const p of projs){
       let tasks = filterTasks(state.tasks.filter(t=>t.projectId===p.id&&!t.done));
       tasks.sort((x,y)=>{
-        if(x.urgent && !y.urgent) return -1;
-        if(!x.urgent && y.urgent) return 1;
         if(x.today && !y.today) return -1;
         if(!x.today && y.today) return 1;
-        if(x.followup && !y.followup) return -1;
-        if(!x.followup && y.followup) return 1;
         return 0;
       });
       if(tasks.length > 0){
@@ -3548,8 +3487,6 @@ function renderTable(){
 
           for(const t of tasks){
             const flagHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:3px">
-              ${t.urgent ? `<span class="flag-badge flag-badge-urgent" title="Urgent">${lucideIcon('zap','11')}</span>` : ''}
-              ${t.followup ? `<span class="flag-badge flag-badge-followup" title="Follow-up">${lucideIcon('message-circle','11')}</span>` : ''}
               ${t.today ? `<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','11')}</span>` : ''}
             </div>`;
 
@@ -4685,14 +4622,12 @@ function renderSmartList(type){
   const td = todayStr();
   let allTasks = [...state.tasks];
 
-  let titleMap = {all:'All Tasks',today:'Today',followup:'Follow-up',urgent:'Urgent',archive:'Completed Tasks',hidden:'Hidden Tasks',snoozed:'Snoozed Tasks'};
-  let iconMap = {all:'📋',today:'☀',followup:'🔵',urgent:'🔴',archive:'✓',hidden:'👁️',snoozed:'⏰'};
+  let titleMap = {all:'All Tasks',today:'Today',archive:'Completed Tasks',hidden:'Hidden Tasks',snoozed:'Snoozed Tasks'};
+  let iconMap = {all:'📋',today:'☀',archive:'✓',hidden:'👁️',snoozed:'⏰'};
 
   function matchFilter(t){
     if(type==='all') return !t.done;
     if(type==='today') return !t.done&&t.today;
-    if(type==='followup') return !t.done&&t.followup;
-    if(type==='urgent') return !t.done&&t.urgent;
     if(type==='overdue') return false; // Overdue removed (no due dates)
     if(type==='archive') return t.done;
     if(type==='hidden') return !!t.hidden;
@@ -4708,12 +4643,8 @@ function renderSmartList(type){
   if(state.selProj) tasks = tasks.filter(t=>t.projectId===state.selProj);
 
   tasks.sort((a,b)=>{
-    if(a.urgent && !b.urgent) return -1;
-    if(!a.urgent && b.urgent) return 1;
     if(a.today && !b.today) return -1;
     if(!a.today && b.today) return 1;
-    if(a.followup && !b.followup) return -1;
-    if(!a.followup && b.followup) return 1;
     return 0;
   });
 
@@ -4754,7 +4685,7 @@ function renderSmartList(type){
 
   const qaHtml = addQuickAdd ? `
     <div class="list-quick-add">
-      <input id="list-qa" placeholder="Quick add task… (use ! urgent, @ followup, #today, d:YYYY-MM-DD, p:project)"
+      <input id="list-qa" placeholder="Quick add task… (use #today, d:YYYY-MM-DD, p:project)"
         onkeydown="if(event.key==='Enter')handleListQA(this)">
       <button onclick="handleListQA(document.getElementById('list-qa'))">Add</button>
     </div>` : '';
@@ -4812,12 +4743,8 @@ function renderProjectDetail(projId){
     const activeTasks = state.tasks.filter(t=>t.projectId===projId&&!t.done);
     const doneTasks = state.tasks.filter(t=>t.projectId===projId&&t.done);
     activeTasks.sort((a,b)=>{
-      if(a.urgent && !b.urgent) return -1;
-      if(!a.urgent && b.urgent) return 1;
       if(a.today && !b.today) return -1;
       if(!a.today && b.today) return 1;
-      if(a.followup && !b.followup) return -1;
-      if(!a.followup && b.followup) return 1;
       return 0;
     });
     body = `
@@ -6276,8 +6203,6 @@ function showTaskModal(id, defaults){
       <div class="cb ${s.done?'checked':''}" onclick="toggleSubInModal(this,'${s.id}')"></div>
       <input value="${esc(s.title)}" placeholder="Subtask..." data-sub-title="${s.id}">
       <div class="sub-flags" style="display:flex;gap:2px">
-        <button class="flag-btn sub-urgent ${s.urgent?'on-urgent':''}" onclick="event.stopPropagation();this.classList.toggle('on-urgent')" title="Urgent">${lucideIcon('zap','14')}</button>
-        <button class="flag-btn sub-followup ${s.followup?'on-followup':''}" onclick="event.stopPropagation();this.classList.toggle('on-followup')" title="Follow-up">${lucideIcon('message-circle','14')}</button>
         <button class="flag-btn sub-today ${s.today?'on-today':''}" onclick="event.stopPropagation();this.classList.toggle('on-today')" title="Today">${lucideIcon('sun','14')}</button>
       </div>
       <button class="subtask-del" onclick="this.closest('.subtask-row').remove()">${lucideIcon('x','14')}</button>
@@ -6307,8 +6232,6 @@ function showTaskModal(id, defaults){
     <div class="form-group">
       <label class="form-label">Flags</label>
       <div class="toggle-row">
-        <button class="toggle-btn ${(t?.urgent||data.urgent)?'on-urgent':''}" id="t-urgent" onclick="this.classList.toggle('on-urgent')">${lucideIcon('zap','16')} Urgent</button>
-        <button class="toggle-btn ${(t?.followup||data.followup)?'on-followup':''}" id="t-followup" onclick="this.classList.toggle('on-followup')">${lucideIcon('message-circle','16')} Follow-up</button>
         <button class="toggle-btn ${(t?.today||data.today)?'on-today':''}" id="t-today" onclick="this.classList.toggle('on-today')">${lucideIcon('sun','16')} Today</button>
       </div>
     </div>
@@ -6354,8 +6277,6 @@ function addSubtaskRow(){
   row.innerHTML = `<div class="cb" onclick="toggleSubInModal(this,'${row.dataset.subId}')"></div>
     <input placeholder="Subtask..." data-sub-title="${row.dataset.subId}">
     <div class="sub-flags" style="display:flex;gap:2px">
-      <button class="flag-btn sub-urgent" onclick="event.stopPropagation();this.classList.toggle('on-urgent')" title="Urgent">${lucideIcon('zap','14')}</button>
-      <button class="flag-btn sub-followup" onclick="event.stopPropagation();this.classList.toggle('on-followup')" title="Follow-up">${lucideIcon('message-circle','14')}</button>
       <button class="flag-btn sub-today" onclick="event.stopPropagation();this.classList.toggle('on-today')" title="Today">${lucideIcon('sun','14')}</button>
     </div>
     <button class="subtask-del" onclick="this.closest('.subtask-row').remove()">${lucideIcon('x','14')}</button>`;
@@ -6372,8 +6293,6 @@ function saveTask(id){
   if(!title){ alert('Title is required'); return; }
   const projectId = document.getElementById('t-proj').value||null;
   const recurring = document.getElementById('t-rec').value||null;
-  const urgent = document.getElementById('t-urgent').classList.contains('on-urgent');
-  const followup = document.getElementById('t-followup').classList.contains('on-followup');
   const today = document.getElementById('t-today').classList.contains('on-today');
   const done = document.getElementById('t-complete').classList.contains('checked');
   const hidden = document.getElementById('t-hidden').classList.contains('hidden');
@@ -6385,10 +6304,8 @@ function saveTask(id){
     const subId = row.dataset.subId;
     const inp = row.querySelector(`input[data-sub-title]`);
     const done = row.querySelector('.cb')?.classList.contains('checked')||false;
-    const subUrgent = row.querySelector('.sub-urgent')?.classList.contains('on-urgent')||false;
-    const subFollowup = row.querySelector('.sub-followup')?.classList.contains('on-followup')||false;
     const subToday = row.querySelector('.sub-today')?.classList.contains('on-today')||false;
-    return {id:subId, title:inp?.value.trim()||'', done, urgent:subUrgent, followup:subFollowup, today:subToday};
+    return {id:subId, title:inp?.value.trim()||'', done, today:subToday};
   }).filter(s=>s.title);
 
   let t;
@@ -6397,12 +6314,12 @@ function saveTask(id){
     history.push(`Update task: ${taskById(id)?.title || id}`, state);
     t = taskById(id);
     const snoozedAt = snoozed ? (t.snoozedAt||now) : null;
-    Object.assign(t,{title,projectId,recurring,urgent,followup,today,done,hidden,snoozedAt,notes,subs,updated:now});
+    Object.assign(t,{title,projectId,recurring,today,done,hidden,snoozedAt,notes,subs,updated:now});
   } else {
     history.push(`Create task: ${title}`, state);
     const tasksInProj = state.tasks.filter(x=>x.projectId===projectId&&!x.done).length;
     const snoozedAt = snoozed ? now : null;
-    t = {id:uid(),title,projectId,recurring,urgent,followup,today,hidden,snoozedAt,notes,subs,done:done||false,order:tasksInProj,createdAt:new Date().toISOString(),updated:now};
+    t = {id:uid(),title,projectId,recurring,today,hidden,snoozedAt,notes,subs,done:done||false,order:tasksInProj,createdAt:new Date().toISOString(),updated:now};
     state.tasks.push(t);
   }
   sv();
@@ -6555,12 +6472,8 @@ let dragAcctId = null;
 // Task and Account Reordering
 function getTasksInProject(projId){
   return state.tasks.filter(t=>t.projectId===projId&&!t.done).sort((a,b)=>{
-    if(a.urgent && !b.urgent) return -1;
-    if(!a.urgent && b.urgent) return 1;
     if(a.today && !b.today) return -1;
     if(!a.today && b.today) return 1;
-    if(a.followup && !b.followup) return -1;
-    if(!a.followup && b.followup) return 1;
     return (a.order||0) - (b.order||0);
   });
 }
@@ -6831,10 +6744,10 @@ function exportCSV(){
 
   // TASKS - including order, hidden, createdAt
   lines.push('### TASKS ###');
-  lines.push('id,title,projectId,due,priority,urgent,followup,today,done,recurring,notes,subs,order,hidden,createdAt');
+  lines.push('id,title,projectId,due,priority,today,done,recurring,notes,subs,order,hidden,createdAt');
   state.tasks.forEach(t=>lines.push([
     t.id, t.title, t.projectId||'', t.due||'', t.priority||'',
-    t.urgent?'1':'', t.followup?'1':'', t.today?'1':'', t.done?'1':'',
+    t.today?'1':'', t.done?'1':'',
     t.recurring||'', t.notes||'', JSON.stringify(t.subs||[]),
     t.order||0, t.hidden?'1':'', t.createdAt||''
   ].map(csvEscField).join(',')));
@@ -6898,7 +6811,7 @@ function exportTableViewCSV(){
   const lines = [];
   const accounts = _sortCache.accountsSorted||state.accounts||[];
 
-  lines.push('Account,Project,Task,Priority,Due Date,Urgent,Follow-up,Today');
+  lines.push('Account,Project,Task,Priority,Due Date,Today');
 
   for(const a of accounts){
     if(state.selAcct && a.id!==state.selAcct) continue;
@@ -6909,12 +6822,8 @@ function exportTableViewCSV(){
     for(const p of projs){
       let tasks = filterTasks(state.tasks.filter(t=>t.projectId===p.id&&!t.done));
       tasks.sort((x,y)=>{
-        if(x.urgent && !y.urgent) return -1;
-        if(!x.urgent && y.urgent) return 1;
         if(x.today && !y.today) return -1;
         if(!x.today && y.today) return 1;
-        if(x.followup && !y.followup) return -1;
-        if(!x.followup && y.followup) return 1;
         return 0;
       });
 
@@ -6925,8 +6834,6 @@ function exportTableViewCSV(){
           t.title,
           t.priority||'',
           t.due||'',
-          t.urgent?'Yes':'No',
-          t.followup?'Yes':'No',
           t.today?'Yes':'No'
         ].map(csvEscField).join(','));
       }
@@ -7019,9 +6926,9 @@ function importCSV(text){
   // TASKS - with order, hidden, createdAt
   state.tasks = sections.TASKS.map(r=>({
     id:r[0],title:r[1],projectId:r[2]||null,due:r[3]||null,priority:r[4]||null,
-    urgent:r[5]==='1',followup:r[6]==='1',today:r[7]==='1',done:r[8]==='1',
-    recurring:r[9]||null,notes:r[10]||'',subs:JSON.parse(r[11]||'[]'),
-    order:r[12]?parseInt(r[12]):undefined,hidden:r[13]==='1',createdAt:r[14]||new Date().toISOString()
+    today:r[5]==='1',done:r[6]==='1',
+    recurring:r[7]||null,notes:r[8]||'',subs:JSON.parse(r[9]||'[]'),
+    order:r[10]?parseInt(r[10]):undefined,hidden:r[11]==='1',createdAt:r[12]||new Date().toISOString()
   }));
 
   // PROJECT_INFO - all fields
@@ -7143,8 +7050,6 @@ function bindGlobalEvents(){
 
     // Toggle filters for flag buttons instead of switching view
     if(view === 'today') { state.flt.t = !state.flt.t; sv(); render(); }
-    else if(view === 'followup') { state.flt.f = !state.flt.f; sv(); render(); }
-    else if(view === 'urgent') { state.flt.u = !state.flt.u; sv(); render(); }
     else { setView(view); }
   });
 
@@ -7435,11 +7340,11 @@ async function init(){
     const now = new Date().toISOString();
     const td = todayStr();
     state.tasks = [
-      {id:uid(),title:'Set up project structure',projectId:p1.id,due:null,priority:'High',urgent:false,followup:false,today:true,done:false,subs:[],notes:'',createdAt:now},
-      {id:uid(),title:'Review wireframes with client',projectId:p1.id,due:td,priority:'Medium',urgent:true,followup:false,today:false,done:false,subs:[{id:uid(),title:'Prepare notes',done:false}],notes:'',createdAt:now},
-      {id:uid(),title:'Write Q2 campaign brief',projectId:p2.id,due:null,priority:'Medium',urgent:false,followup:true,today:false,done:false,subs:[],notes:'',createdAt:now},
-      {id:uid(),title:'Research competitors',projectId:p2.id,due:null,priority:'Low',urgent:false,followup:false,today:false,done:true,subs:[],notes:'',createdAt:now},
-      {id:uid(),title:'Build MVP prototype',projectId:p3.id,due:null,priority:'High',urgent:false,followup:false,today:false,done:false,subs:[],notes:'',createdAt:now},
+      {id:uid(),title:'Set up project structure',projectId:p1.id,due:null,priority:'High',today:true,done:false,subs:[],notes:'',createdAt:now},
+      {id:uid(),title:'Review wireframes with client',projectId:p1.id,due:td,priority:'Medium',today:false,done:false,subs:[{id:uid(),title:'Prepare notes',done:false}],notes:'',createdAt:now},
+      {id:uid(),title:'Write Q2 campaign brief',projectId:p2.id,due:null,priority:'Medium',today:false,done:false,subs:[],notes:'',createdAt:now},
+      {id:uid(),title:'Research competitors',projectId:p2.id,due:null,priority:'Low',today:false,done:true,subs:[],notes:'',createdAt:now},
+      {id:uid(),title:'Build MVP prototype',projectId:p3.id,due:null,priority:'High',today:false,done:false,subs:[],notes:'',createdAt:now},
     ];
     sv();
   }
