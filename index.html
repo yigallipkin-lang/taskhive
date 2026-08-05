@@ -3328,8 +3328,8 @@ function setupKanbanScrolling(){
 
   container.addEventListener('mousedown', (e) => {
     if(e.button !== 0) return; // Left click only
-    // Don't grab if clicking on quick add input or button
-    if(e.target.closest('.col-add') || e.target.closest('input[data-qa-proj]') || e.target.closest('.col-add-btn')) return;
+    // Don't grab if clicking on quick add input, button, or draggable account header
+    if(e.target.closest('.col-add') || e.target.closest('input[data-qa-proj]') || e.target.closest('.col-add-btn') || e.target.closest('.acct-header')) return;
     isDown = true;
     startX = e.pageX - container.offsetLeft;
     scrollLeft = container.scrollLeft;
