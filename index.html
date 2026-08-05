@@ -8417,7 +8417,7 @@ function renderProductionStatus() {
       <table class="prod-table">
         <thead>
           <tr>
-            <th>Delivery Description</th>
+            <th style="width: 100px;">Delivery Description</th>
             <th style="width: 70px;">Serial No.</th>
             <th style="width: 85px;">Contract Date</th>
             <th style="width: 95px;">Planned/Actual</th>
@@ -8493,20 +8493,18 @@ function renderProductionStatus() {
           let statusColor = '#333';
 
           if (isDelivered) {
-            // Past date: check if delivered on-time or late
+            // Past date: entire row gray (delivered), but distinguish in status
+            rowTextColor = '#999';
             if (actualDateNorm && contractDateNorm && actualDateNorm <= contractDateNorm) {
               // Delivered on-time
-              rowTextColor = '#999';
               statusText = 'Delivered';
               statusColor = '#999';
             } else if (actualDateNorm && contractDateNorm && actualDateNorm > contractDateNorm) {
-              // Delivered late
-              rowTextColor = '#DC2626';
+              // Delivered late (still gray row, but status indicates late)
               statusText = 'Delivered - Late';
-              statusColor = '#DC2626';
+              statusColor = '#999';
             } else {
               // Delivered but no contract date to compare
-              rowTextColor = '#999';
               statusText = 'Delivered';
               statusColor = '#999';
             }
