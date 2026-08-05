@@ -3448,74 +3448,68 @@ function renderTable(){
     html += `<div class="table-page">
       <div class="table-header">
         <div class="table-title">📋 Tasks</div>
-        <div class="table-subtitle">Grouped by Account and Project</div>
+        <div class="table-subtitle">All tasks in table format</div>
       </div>
       ${getFlagFilterBar()}
       <div class="table-container">
         <table class="task-table-styled">
           <thead>
             <tr>
-              <th style="width: 380px;">Task</th>
-              <th style="width: 160px; text-align: center;">Status</th>
-              <th style="width: 160px;">Flag</th>
+              <th style="width: 120px;">Account</th>
+              <th style="width: 120px;">Project</th>
+              <th style="width: 280px;">Task</th>
+              <th style="width: 120px; text-align: center;">Status</th>
+              <th style="width: 100px;">Flag</th>
             </tr>
           </thead>
           <tbody>`;
 
+    // Flatten all tasks across all accounts and projects
+    const allTasks = [];
     for(const { account: a, projectGroups } of accountsWithTasks){
-      const acctId = a.id;
-      const isCollapsed = window.tableCollapsed && window.tableCollapsed[acctId];
-      const arrowDir = isCollapsed ? '▶' : '▼';
+      for(const projId in projectGroups){
+        const { project: p, tasks } = projectGroups[projId];
+        totalTaskCount += tasks.length;
+        for(const t of tasks){
+          allTasks.push({ task: t, account: a, project: p });
+        }
+      }
+    }
 
-      html += `<tr>
-        <td colspan="3" class="acct-header" onclick="toggleTableAcctCollapse('${acctId}')" style="border-bottom-color: ${a.color}; cursor: pointer;">
-          <span class="acct-arrow">${arrowDir}</span> ${esc(a.name)}
+    // Render all tasks in flat table
+    for(const { task: t, account: a, project: p } of allTasks){
+      const flagHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:3px">
+        ${t.today ? `<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','11')}</span>` : ''}
+      </div>`;
+
+      html += `<tr class="task-row-styled" data-task-id="${t.id}">
+        <td style="font-size:12px;color:${esc(a.color)};font-weight:500">${esc(a.name)}</td>
+        <td style="font-size:12px;color:${esc(p.color)}">${esc(p.name)}</td>
+        <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
+          <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
         </td>
+        <td style="text-align:center">
+          <div class="cb ${t.done?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')" style="margin:auto"></div>
+        </td>
+        <td style="text-align:center">${flagHtml}</td>
       </tr>`;
 
-      if(!isCollapsed){
-        for(const projId in projectGroups){
-          const { project: p, tasks } = projectGroups[projId];
-          totalTaskCount += tasks.length;
+      // Render subtasks if any
+      const hasSubs = t.subs && t.subs.length > 0;
+      const activeSubs = hasSubs ? t.subs.filter(s => !s.done) : [];
 
-          html += `<tr>
-            <td colspan="3" class="proj-header">
-              <div class="color-dot" style="background-color: ${p.color};"></div>
-              <span class="proj-name">${esc(p.name)}</span>
-            </td>
-          </tr>`;
-
-          for(const t of tasks){
-            const flagHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:3px">
-              ${t.today ? `<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','11')}</span>` : ''}
-            </div>`;
-
-            html += `<tr class="task-row-styled" data-task-id="${t.id}">
-              <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
-                <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
-              </td>
-              <td style="text-align:center">
-                <div class="cb ${t.done?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')" style="margin:auto"></div>
-              </td>
-              <td style="text-align:center">${flagHtml}</td>
-            </tr>`;
-
-            const hasSubs = t.subs && t.subs.length > 0;
-            const activeSubs = hasSubs ? t.subs.filter(s => !s.done) : [];
-
-            for(const s of activeSubs){
-              html += `<tr class="task-row-styled" data-task-id="${t.id}" data-sub-id="${s.id}" style="background:var(--bg-hover)">
-                <td style="padding:4px 10px 4px 32px;cursor:pointer" onclick="showTaskModal('${t.id}')">
-                  <span style="font-size:12px;color:var(--t2)">• ${esc(s.title)}</span>
-                </td>
-                <td style="text-align:center">
-                  <div class="cb-round ${s.done?'checked':''}" style="width:16px;height:16px;border-width:1.5px;margin:auto" onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')"></div>
-                </td>
-                <td></td>
-              </tr>`;
-            }
-          }
-        }
+      for(const s of activeSubs){
+        html += `<tr class="task-row-styled" data-task-id="${t.id}" data-sub-id="${s.id}" style="background:var(--bg-hover)">
+          <td></td>
+          <td></td>
+          <td style="padding:4px 10px 4px 32px;cursor:pointer" onclick="showTaskModal('${t.id}')">
+            <span style="font-size:12px;color:var(--t2)">• ${esc(s.title)}</span>
+          </td>
+          <td style="text-align:center">
+            <div class="cb-round ${s.done?'checked':''}" style="width:16px;height:16px;border-width:1.5px;margin:auto" onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')"></div>
+          </td>
+          <td></td>
+        </tr>`;
       }
     }
 
@@ -3527,12 +3521,6 @@ function renderTable(){
   }
 
   document.getElementById('main').innerHTML = html;
-}
-
-function toggleTableAcctCollapse(acctId){
-  if(!window.tableCollapsed) window.tableCollapsed = {};
-  window.tableCollapsed[acctId] = !window.tableCollapsed[acctId];
-  render();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
