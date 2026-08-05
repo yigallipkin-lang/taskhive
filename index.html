@@ -3455,11 +3455,11 @@ function renderTable(){
         <table class="task-table-styled">
           <thead>
             <tr>
-              <th style="width: 120px;">Account</th>
-              <th style="width: 120px;">Project</th>
-              <th style="width: 280px;">Task</th>
-              <th style="width: 120px; text-align: center;">Status</th>
-              <th style="width: 100px;">Flag</th>
+              <th style="width: 160px;">Account</th>
+              <th style="width: 160px;">Project</th>
+              <th style="width: 400px;">Task</th>
+              <th style="width: 180px; text-align: center;">Status</th>
+              <th style="width: 100px; text-align: center;">Today</th>
             </tr>
           </thead>
           <tbody>`;
@@ -3478,9 +3478,21 @@ function renderTable(){
 
     // Render all tasks in flat table
     for(const { task: t, account: a, project: p } of allTasks){
-      const flagHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:3px">
-        ${t.today ? `<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','11')}</span>` : ''}
+      const statusHtml = `<div style="display:flex;gap:6px;justify-content:center;align-items:center">
+        <button onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:${t.done?'#10B981':'#F3F4F6'};border:none;padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;width:32px;height:32px">
+          ${lucideIcon(t.done?'check-circle-2':'circle','13')}
+        </button>
+        <button onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:${t.hidden?'#F59E0B':'#F3F4F6'};border:none;padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;width:32px;height:32px">
+          ${lucideIcon(t.hidden?'eye-off':'eye','13')}
+        </button>
+        <button onclick="event.stopPropagation();toggleSnoozed('${t.id}')" title="Snooze" style="background:${t.snoozedAt?'#3B82F6':'#F3F4F6'};border:none;padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;width:32px;height:32px">
+          ${lucideIcon(t.snoozedAt?'clock':'clock','13')}
+        </button>
       </div>`;
+
+      const todayHtml = `<button onclick="event.stopPropagation();toggleToday('${t.id}')" title="Toggle Today" style="background:${t.today?'#F59E0B':'#F3F4F6'};border:none;padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;width:32px;height:32px" class="today-btn">
+        ${lucideIcon('sun','14')}
+      </button>`;
 
       html += `<tr class="task-row-styled" data-task-id="${t.id}">
         <td style="font-size:12px;color:${esc(a.color)};font-weight:500">${esc(a.name)}</td>
@@ -3488,10 +3500,8 @@ function renderTable(){
         <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
           <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
         </td>
-        <td style="text-align:center">
-          <div class="cb ${t.done?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')" style="margin:auto"></div>
-        </td>
-        <td style="text-align:center">${flagHtml}</td>
+        <td style="text-align:center">${statusHtml}</td>
+        <td style="text-align:center">${todayHtml}</td>
       </tr>`;
 
       // Render subtasks if any
@@ -6369,6 +6379,22 @@ function toggleSnoozed(id){
   restoreScrollPosition();
 }
 
+function toggleToday(id){
+  const t = taskById(id); if(!t) return;
+  t.today = !t.today;
+  t.updated = Date.now();
+  sv();
+  syncTaskToFirebase(t);
+  // Update DOM directly without re-rendering to prevent task reordering
+  const row = document.querySelector(`[data-task-id="${id}"]`);
+  if(row){
+    const btn = row.querySelector('.today-btn');
+    if(btn){
+      btn.style.background = t.today ? '#F59E0B' : '#F3F4F6';
+    }
+  }
+}
+
 function toggleSubtaskDone(taskId, subId){
   const t = taskById(taskId); if(!t || !t.subs) return;
   const s = t.subs.find(x=>x.id===subId); if(!s) return;
@@ -7680,7 +7706,7 @@ function renderRepairStatus(){
     .repair-view-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--tx);margin-bottom:4px}
     .repair-view-subtitle{font-size:12px;color:var(--mu)}
     .repair-table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0;background:var(--bg-app);display:block;width:100%;max-width:100vw}
-    .repair-table{width:auto;border-collapse:collapse;background:var(--bg-card);font-size:13px;border:1px solid var(--border);table-layout:auto;min-width:1200px;display:table}
+    .repair-table-styled{width:auto;border-collapse:collapse;background:transparent;font-size:13px}
     .repair-table-container{overflow-x:auto !important;-webkit-overflow-scrolling:touch;display:block !important;width:100%;max-width:100vw}
     .repair-table th{background:var(--bg-active);color:var(--tx);padding:8px 6px;text-align:left;font-weight:600;border-bottom:2px solid var(--border);white-space:nowrap;border-right:1px solid var(--border);overflow:visible;min-width:80px;line-height:1.3;display:table-cell!important}
     .repair-table th:last-child{border-right:none}
