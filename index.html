@@ -8313,6 +8313,26 @@ function getDeliveryStatus(contractDate, actualDate) {
   }
 }
 
+// Date formatting utilities
+function formatDateDDMMYY(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr + 'T00:00:00');
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = String(date.getFullYear()).slice(-2);
+  return `${day}/${month}/${year}`;
+}
+
+function parseDateDDMMYY(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return '';
+  const day = parts[0];
+  const month = parts[1];
+  const year = '20' + parts[2]; // Assume 20XX for YY format
+  return `${year}-${month}-${day}`;
+}
+
 function renderProductionStatus() {
   const projects = state.projects || [];
   const accounts = state.accounts || [];
@@ -8502,12 +8522,12 @@ function renderProductionStatus() {
                 onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'serialNumber', this.value)">
             </td>
             <td>
-              <input type="date" class="prod-input" value="${del.contractDate || ''}"
-                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'contractDate', this.value)">
+              <input type="text" class="prod-input" placeholder="DD/MM/YY" value="${formatDateDDMMYY(del.contractDate)}"
+                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'contractDate', parseDateDDMMYY(this.value))">
             </td>
             <td style="font-weight: ${actualDateNorm && !isDelivered ? '600' : '400'};">
-              <input type="date" class="prod-input" value="${del.actualDate || ''}"
-                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'actualDate', this.value)">
+              <input type="text" class="prod-input" placeholder="DD/MM/YY" value="${formatDateDDMMYY(del.actualDate)}"
+                onchange="updateProjectDelivery('${del.projectId}', '${del.id}', 'actualDate', parseDateDDMMYY(this.value))">
             </td>
             <td style="text-align: center; font-weight: 600; color: ${statusColor};">
               ${statusText}
@@ -8791,6 +8811,8 @@ window.updateProjectDelivery = updateProjectDelivery;
 window.duplicateDelivery = duplicateDelivery;
 window.exportProductionCSV = exportProductionCSV;
 window.getDeliveryStatus = getDeliveryStatus;
+window.formatDateDDMMYY = formatDateDDMMYY;
+window.parseDateDDMMYY = parseDateDDMMYY;
 
 // Global export function
 function exportCurrentView() {
