@@ -8407,11 +8407,11 @@ function renderProductionStatus() {
             if (actualDateNorm && comparisonDate && actualDateNorm <= comparisonDate) {
               // Delivered on-time
               statusText = 'Delivered On-Time';
-              statusColor = '#059669';
+              statusColor = '#999';
             } else if (actualDateNorm && comparisonDate && actualDateNorm > comparisonDate) {
               // Delivered late
               statusText = 'Delivered Late';
-              statusColor = '#DC2626';
+              statusColor = '#999';
             } else {
               // Delivered but no agreed/contract date to compare
               statusText = 'Delivered';
