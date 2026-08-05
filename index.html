@@ -8510,13 +8510,11 @@ function renderProductionStatus() {
               statusColor = '#999';
             }
           } else if (actualDateNorm && contractDateNorm) {
-            // Future date: green if on-time, red if late
+            // Future date: keep row black, color only status column
             if (actualDateNorm <= contractDateNorm) {
-              rowTextColor = '#059669';
               statusText = 'On-time';
               statusColor = '#059669';
             } else {
-              rowTextColor = '#DC2626';
               statusText = 'Late';
               statusColor = '#DC2626';
             }
