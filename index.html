@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.11.0">
+<meta name="version" content="2.12.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -2806,12 +2806,10 @@ function renderTopBar(){
     'upcoming-topics':'Upcoming Topics',
     'project-list':'Project List',
     today:'Today',
-    archive:'Archive',
-    'archived-projects':'Archived Projects',
-    'completed-tasks':'Completed Tasks',
-    'hidden-tasks':'Hidden Tasks',
-    'snoozed-tasks':'Snoozed Tasks',
-    'production-status-board':'Production Status'
+    archive:'Completed Tasks',
+    hidden:'Hidden Tasks',
+    snoozed:'Snoozed Tasks',
+    'archived-projects':'Archived Projects'
   };
   const v = state.view;
   const title = v.startsWith('p:') ? (projById(v.slice(2))?.name||'Project') : (viewNames[v]||'TaskHive');
@@ -3459,9 +3457,6 @@ function renderTable(){
     let totalTaskCount = 0;
 
     html += `<div class="table-page">
-      <div class="table-header">
-        <div class="table-title">📋 Tasks</div>
-      </div>
       ${getFlagFilterBar()}
       <div class="table-container">
         <table class="task-table-styled">
@@ -7751,9 +7746,6 @@ function renderRepairStatus(){
     .repair-date { font-variant-numeric: tabular-nums; }
   </style>
   <div class="repair-page">
-    <div class="repair-header">
-      <div class="repair-title">🔧 Repair Status</div>
-    </div>
     <div class="repair-table-container">
       <table class="repair-table-styled">
         <thead>
@@ -8069,9 +8061,6 @@ function renderUpcomingTopicsTable() {
     .topics-empty { text-align: center; padding: 40px 20px; color: var(--t3); }
   </style>
   <div class="topics-page">
-    <div class="topics-header">
-      <div class="topics-title">📋 Upcoming Topics</div>
-    </div>
     <div class="topics-actions">
       <button class="btn-primary" onclick="addTopic()">➕ Add Topic</button>
     </div>
@@ -8289,9 +8278,6 @@ function renderProductionStatus() {
     .btn-cancel { padding: 8px 14px; background: var(--bg-active); color: var(--tx); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 12px; }
   </style>
   <div class="prod-page">
-    <div class="prod-header">
-      <div class="prod-title">📦 Production Status</div>
-    </div>
     <div class="prod-actions">
       <button class="btn-primary" onclick="openAddDeliveryModal()">➕ Add Delivery</button>
     </div>`;
