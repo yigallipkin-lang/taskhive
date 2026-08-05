@@ -3478,7 +3478,7 @@ function renderTable(){
 
     // Render all tasks in flat table
     for(const { task: t, account: a, project: p } of allTasks){
-      const todayHtml = `<button onclick="event.stopPropagation();toggleToday('${t.id}')" title="Toggle Today" style="background:${t.today?'#F59E0B':'#F3F4F6'};border:none;color:${t.today?'#FFFFFF':'#9CA3AF'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="today-btn" onmouseover="this.style.background='${t.today?'#D97706':'#E5E7EB'}';this.style.color='${t.today?'#FFFFFF':'#6B7280'}';this.style.boxShadow='${t.today?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.background='${t.today?'#F59E0B':'#F3F4F6'}';this.style.color='${t.today?'#FFFFFF':'#9CA3AF'}';this.style.boxShadow='${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
+      const todayHtml = `<button onclick="event.stopPropagation();toggleToday('${t.id}')" title="Toggle Today" style="background:${t.today?'#F59E0B':'#F3F4F6'};border:none;color:${t.today?'#F59E0B':'#D1D5DB'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="today-btn" onmouseover="this.style.color='${t.today?'#FFFFFF':'#F59E0B'}';this.style.background='${t.today?'#D97706':'#E5E7EB'}';this.style.boxShadow='${t.today?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.color='${t.today?'#F59E0B':'#D1D5DB'}';this.style.background='${t.today?'#F59E0B':'#F3F4F6'}';this.style.boxShadow='${t.today?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
         ${lucideIcon('sun','14')}
       </button>`;
 
@@ -3489,13 +3489,13 @@ function renderTable(){
           <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
         </td>
         <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
-          <button onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:${t.done?'#10B981':'#F3F4F6'};border:none;color:${t.done?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.done?'#059669':'#E5E7EB'}';this.style.boxShadow='${t.done?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.background='${t.done?'#10B981':'#F3F4F6'}';this.style.boxShadow='${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
+          <button onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:${t.done?'#10B981':'#F3F4F6'};border:none;color:${t.done?'#10B981':'#D1D5DB'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.color='${t.done?'#FFFFFF':'#10B981'}';this.style.background='${t.done?'#059669':'#E5E7EB'}';this.style.boxShadow='${t.done?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.color='${t.done?'#10B981':'#D1D5DB'}';this.style.background='${t.done?'#10B981':'#F3F4F6'}';this.style.boxShadow='${t.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
             ${lucideIcon(t.done?'check-circle-2':'circle','13')}
           </button>
-          <button onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:${t.hidden?'#F59E0B':'#F3F4F6'};border:none;color:${t.hidden?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.hidden?'#D97706':'#E5E7EB'}';this.style.boxShadow='${t.hidden?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.background='${t.hidden?'#F59E0B':'#F3F4F6'}';this.style.boxShadow='${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
+          <button onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:${t.hidden?'#F59E0B':'#F3F4F6'};border:none;color:${t.hidden?'#F59E0B':'#D1D5DB'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}" class="status-btn" onmouseover="this.style.color='${t.hidden?'#FFFFFF':'#F59E0B'}';this.style.background='${t.hidden?'#D97706':'#E5E7EB'}';this.style.boxShadow='${t.hidden?'0 4px 8px rgba(245,158,11,0.3)':'none'}'" onmouseout="this.style.color='${t.hidden?'#F59E0B':'#D1D5DB'}';this.style.background='${t.hidden?'#F59E0B':'#F3F4F6'}';this.style.boxShadow='${t.hidden?'0 2px 4px rgba(245,158,11,0.2)':'none'}'">
             ${lucideIcon(t.hidden?'eye-off':'eye','13')}
           </button>
-          <button onclick="event.stopPropagation();toggleSnoozed('${t.id}')" title="Snooze" style="background:${t.snoozedAt?'#3B82F6':'#F3F4F6'};border:none;color:${t.snoozedAt?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.snoozedAt?'0 2px 4px rgba(59,130,246,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${t.snoozedAt?'#2563EB':'#E5E7EB'}';this.style.boxShadow='${t.snoozedAt?'0 4px 8px rgba(59,130,246,0.3)':'none'}'" onmouseout="this.style.background='${t.snoozedAt?'#3B82F6':'#F3F4F6'}';this.style.boxShadow='${t.snoozedAt?'0 2px 4px rgba(59,130,246,0.2)':'none'}'">
+          <button onclick="event.stopPropagation();toggleSnoozed('${t.id}')" title="Snooze" style="background:${t.snoozedAt?'#3B82F6':'#F3F4F6'};border:none;color:${t.snoozedAt?'#3B82F6':'#D1D5DB'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${t.snoozedAt?'0 2px 4px rgba(59,130,246,0.2)':'none'}" class="status-btn" onmouseover="this.style.color='${t.snoozedAt?'#FFFFFF':'#3B82F6'}';this.style.background='${t.snoozedAt?'#2563EB':'#E5E7EB'}';this.style.boxShadow='${t.snoozedAt?'0 4px 8px rgba(59,130,246,0.3)':'none'}'" onmouseout="this.style.color='${t.snoozedAt?'#3B82F6':'#D1D5DB'}';this.style.background='${t.snoozedAt?'#3B82F6':'#F3F4F6'}';this.style.boxShadow='${t.snoozedAt?'0 2px 4px rgba(59,130,246,0.2)':'none'}'">
             ${lucideIcon(t.snoozedAt?'clock':'clock','13')}
           </button>
         </td>
@@ -3514,8 +3514,8 @@ function renderTable(){
             <span style="font-size:12px;color:var(--t2)">• ${esc(s.title)}</span>
           </td>
           <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
-            <button onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')" title="Complete" style="background:${s.done?'#10B981':'#F3F4F6'};border:none;color:${s.done?'#FFFFFF':'#6B7280'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${s.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.background='${s.done?'#059669':'#E5E7EB'}';this.style.boxShadow='${s.done?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.background='${s.done?'#10B981':'#F3F4F6'}';this.style.boxShadow='${s.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
-              ${lucideIcon(s.done?'check-circle-2':'circle','16')}
+            <button onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')" title="Complete" style="background:${s.done?'#10B981':'#F3F4F6'};border:none;color:${s.done?'#10B981':'#D1D5DB'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:${s.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.color='${s.done?'#FFFFFF':'#10B981'}';this.style.background='${s.done?'#059669':'#E5E7EB'}';this.style.boxShadow='${s.done?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.color='${s.done?'#10B981':'#D1D5DB'}';this.style.background='${s.done?'#10B981':'#F3F4F6'}';this.style.boxShadow='${s.done?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
+              ${lucideIcon(s.done?'check-circle-2':'circle','13')}
             </button>
           </td>
           <td></td>
@@ -7706,58 +7706,36 @@ function renderRepairStatus(){
   const accounts = state.accounts || [];
 
   let html=`<style>
-    .repair-view-header{padding:20px;border-bottom:2px solid var(--border);background:var(--bg-card)}
-    .repair-view-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--tx);margin-bottom:4px}
-    .repair-view-subtitle{font-size:12px;color:var(--mu)}
-    .repair-table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0;background:var(--bg-app);display:block;width:100%;max-width:100vw}
-    .repair-table{width:auto;border-collapse:collapse;background:var(--bg-card);font-size:13px;border:1px solid var(--border);table-layout:auto;min-width:1200px;display:table}
-    .repair-table-container{overflow-x:auto !important;-webkit-overflow-scrolling:touch;display:block !important;width:100%;max-width:100vw}
-    .repair-table th{background:var(--bg-active);color:var(--tx);padding:8px 6px;text-align:left;font-weight:600;border-bottom:2px solid var(--border);white-space:nowrap;border-right:1px solid var(--border);overflow:visible;min-width:80px;line-height:1.3;display:table-cell!important}
-    .repair-table th:last-child{border-right:none}
-    .repair-table td{padding:8px 6px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:var(--bg-card);overflow:visible;white-space:nowrap;display:table-cell!important}
-    .repair-table td:last-child{border-right:none}
-    .repair-table tbody tr:hover{background:var(--bg-hover)}
-    .repair-cell{cursor:pointer;padding:6px;border-radius:4px;transition:all .15s;min-height:32px;display:flex;align-items:center;box-sizing:border-box;width:100%}
-    /* Force all columns to be visible with display:table-cell */
-    .repair-table td, .repair-table th {
-      display:table-cell!important;
-      visibility:visible!important;
-    }
-    .repair-cell:hover{background:var(--accent-subtle)}
-    .repair-cell.editing{padding:0;display:block}
-    .repair-input,.repair-select{width:100%;padding:8px;border:2px solid var(--accent);border-radius:6px;font-family:var(--font-body);font-size:13px;box-sizing:border-box;background:white;color:var(--tx)}
-    .repair-select{cursor:pointer}
-    .repair-select:focus,.repair-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
-    .repair-select:disabled{background:var(--bg-hover);opacity:0.6}
-    .repair-actions{text-align:center;padding:20px;background:var(--bg-card);border-top:1px solid var(--border);display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .repair-btn{padding:10px 18px;border:1px solid var(--border);border-radius:8px;background:white;color:var(--tx);cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
-    .repair-btn:hover{background:var(--bg-active);border-color:var(--accent);color:var(--accent)}
-    .repair-btn.delete:hover{background:rgba(220,38,38,0.1);border-color:var(--red);color:var(--red)}
-    .repair-badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600}
+    .repair-table-styled { width: auto; border-collapse: collapse; background: transparent; font-size: 13px; }
+    .repair-table-styled thead { background: transparent; }
+    .repair-table-styled th { padding: 5px 10px; text-align: left; font-weight: 600; color: var(--tx); background: transparent; border-bottom: 1px solid #D1D5DB; white-space: nowrap; border-top: 1px solid #D1D5DB; font-size: 12px; }
+    .repair-table-styled td { padding: 5px 10px; border-bottom: 1px solid #E5E7EB; vertical-align: middle; }
+    .repair-row-styled td { background: transparent; padding: 5px 10px; }
+    .repair-table-styled tbody tr:hover { background: transparent; }
+    .repair-cell { cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; display: flex; align-items: center; }
+    .repair-cell:hover { background: var(--accent-subtle); }
+    .repair-cell.editing { padding: 0; display: block; }
+    .repair-input, .repair-select { width: 100%; padding: 8px; border: 2px solid var(--accent); border-radius: 6px; font-family: var(--font-body); font-size: 13px; box-sizing: border-box; background: white; color: var(--tx); }
+    .repair-select { cursor: pointer; }
+    .repair-select:focus, .repair-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+    .repair-custom-dropdown { position: absolute; z-index: 1000; background: white; border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 150px; }
+    .repair-dd-option { padding: 8px 12px; cursor: pointer; transition: background 0.1s; }
+    .repair-dd-option:hover { background: var(--bg-hover); }
   </style>
-  <div class="repair-view-header">
-    <div class="repair-view-title">🔧 Repair Status</div>
-    <div class="repair-view-subtitle">SPECTRO Equipment Repair Tracking & Management</div>
+  <div class="table-header">
+    <div class="table-title">🔧 Repair Status</div>
+    <div class="table-subtitle">Equipment Repair Tracking & Management</div>
   </div>
-  <div class="repair-table-container">
-    <table class="repair-table">
+  <div class="table-container">
+    <table class="repair-table-styled">
       <thead>
         <tr>
-          <th>Account</th>
-          <th>Program</th>
-          <th>Location</th>
-          <th>Program No.</th>
-          <th>Part No.</th>
-          <th>Serial No.</th>
-          <th>Repair Reason</th>
-          <th>Under Warranty</th>
-          <th>Paid</th>
-          <th>ILS Mgr.</th>
-          <th>Start Date</th>
-          <th>Delivery</th>
-          <th>Planned</th>
-          <th>Actual</th>
-          <th></th>
+          <th style="width: 160px;">Account</th>
+          <th style="width: 160px;">Program</th>
+          <th style="width: 400px;">Item</th>
+          <th style="width: 180px;">Warranty</th>
+          <th style="width: 180px; text-align: center;">Status</th>
+          <th style="width: 100px; text-align: center;">Actions</th>
         </tr>
       </thead>
       <tbody>`;
@@ -7775,34 +7753,38 @@ function renderRepairStatus(){
     const progColor = project ? project.color : '#F59E0B';
     const acctColor = account ? account.color : '#6B7280';
 
-    // Check if actual finish date is in the past
-    const isPastDate = row.actualFinish && /^\d{2}\/\d{2}\/\d{4}$/.test(row.actualFinish) && new Date(row.actualFinish.split('/').reverse().join('-')) < new Date();
-    const rowStyle = isPastDate ? 'color:#999999;' : '';
+    // Combine serial and part for item description
+    const itemDesc = row.serialNo ? \`SN: \${row.serialNo}\` : (row.partNo ? \`PN: \${row.partNo}\` : '');
+    const fullDesc = itemDesc ? \`\${itemDesc} - \${row.reason || 'No reason'}\` : row.reason || 'N/A';
 
-    html+=`<tr data-record-id="${row.id}" style="${rowStyle}">
-      <td><div class="repair-cell" data-field="customer" style="border-left:4px solid ${acctColor}" title="Click to edit">${row.customer}</div></td>
-      <td><div class="repair-cell" data-field="program" style="border-left:4px solid ${progColor}" title="Click to edit">${row.program}</div></td>
-      <td><div class="repair-cell" data-field="location" title="Click to edit">${row.location}</div></td>
-      <td><div class="repair-cell" data-field="progNo" title="Click to edit">${row.progNo}</div></td>
-      <td><div class="repair-cell" data-field="partNo" title="Click to edit">${row.partNo}</div></td>
-      <td><div class="repair-cell" data-field="serialNo" title="Click to edit">${row.serialNo}</div></td>
-      <td><div class="repair-cell" data-field="reason" title="Click to edit">${row.reason}</div></td>
-      <td><div class="repair-cell" data-field="warranty" title="Click to edit"><span class="repair-badge" style="background:${row.warranty==='YES'?'rgba(16,185,129,0.15)':'rgba(107,114,128,0.15)'}; color:${row.warranty==='YES'?'var(--grn)':'var(--mu)'}">${row.warranty}</span></div></td>
-      <td><div class="repair-cell" data-field="paidRepair" title="Click to edit"><span class="repair-badge" style="background:${row.paidRepair==='YES'?'rgba(37,99,235,0.15)':'rgba(107,114,128,0.15)'}; color:${row.paidRepair==='YES'?'var(--blu)':'var(--mu)'}">${row.paidRepair}</span></div></td>
-      <td><div class="repair-cell" data-field="ilsMgr" title="Click to edit">${row.ilsMgr}</div></td>
-      <td><div class="repair-cell" data-field="repairStart" title="Click to edit">${row.repairStart}</div></td>
-      <td><div class="repair-cell" data-field="deliveryCommit" title="Click to edit">${row.deliveryCommit}</div></td>
-      <td><div class="repair-cell" data-field="plannedFinish" title="Click to edit">${row.plannedFinish}</div></td>
-      <td><div class="repair-cell" data-field="actualFinish" title="Click to edit">${row.actualFinish}</div></td>
-      <td style="text-align:center;padding:6px"><button class="repair-btn delete" onclick="deleteRepairRecord('${row.id}')" title="Delete record">🗑️</button></td>
-    </tr>`;
+    html+=\`<tr class="repair-row-styled" data-record-id="\${row.id}">
+      <td style="font-size:12px;color:\${esc(acctColor)};font-weight:500"><div class="repair-cell" data-field="customer" title="Click to edit">\${esc(row.customer)}</div></td>
+      <td style="font-size:12px;color:\${esc(progColor)}"><div class="repair-cell" data-field="program" title="Click to edit">\${esc(row.program)}</div></td>
+      <td style="cursor:pointer;font-size:13px;color:var(--tx);font-weight:400" title="\${esc(row.location || '')}">\${esc(fullDesc)}</td>
+      <td style="text-align:center">
+        <div class="repair-cell" data-field="warranty" style="justify-content:center"><span style="display:inline-block;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600;background:\${row.warranty==='YES'?'rgba(16,185,129,0.15)':'rgba(107,114,128,0.15)'};color:\${row.warranty==='YES'?'#10B981':'#6B7280'};cursor:pointer" title="Click to edit">\${esc(row.warranty)}</span></div>
+      </td>
+      <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
+        <button onclick="event.stopPropagation();toggleRepairPaid('\${row.id}')" title="Paid Status" style="background:\${row.paidRepair==='YES'?'#3B82F6':'#F3F4F6'};border:none;color:\${row.paidRepair==='YES'?'#3B82F6':'#D1D5DB'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:\${row.paidRepair==='YES'?'0 2px 4px rgba(59,130,246,0.2)':'none'}" class="status-btn" onmouseover="this.style.color='\${row.paidRepair==='YES'?'#FFFFFF':'#3B82F6'}';this.style.background='\${row.paidRepair==='YES'?'#2563EB':'#E5E7EB'}';this.style.boxShadow='\${row.paidRepair==='YES'?'0 4px 8px rgba(59,130,246,0.3)':'none'}'" onmouseout="this.style.color='\${row.paidRepair==='YES'?'#3B82F6':'#D1D5DB'}';this.style.background='\${row.paidRepair==='YES'?'#3B82F6':'#F3F4F6'}';this.style.boxShadow='\${row.paidRepair==='YES'?'0 2px 4px rgba(59,130,246,0.2)':'none'}'">
+          \${lucideIcon(row.paidRepair==='YES'?'check-circle-2':'circle','13')}
+        </button>
+        <button onclick="event.stopPropagation();toggleRepairComplete('\${row.id}')" title="Repair Complete" style="background:\${row.actualFinish&&row.actualFinish!==''?'#10B981':'#F3F4F6'};border:none;color:\${row.actualFinish&&row.actualFinish!==''?'#10B981':'#D1D5DB'};padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px;box-shadow:\${row.actualFinish&&row.actualFinish!==''?'0 2px 4px rgba(16,185,129,0.2)':'none'}" class="status-btn" onmouseover="this.style.color='\${row.actualFinish&&row.actualFinish!==''?'#FFFFFF':'#10B981'}';this.style.background='\${row.actualFinish&&row.actualFinish!==''?'#059669':'#E5E7EB'}';this.style.boxShadow='\${row.actualFinish&&row.actualFinish!==''?'0 4px 8px rgba(16,185,129,0.3)':'none'}'" onmouseout="this.style.color='\${row.actualFinish&&row.actualFinish!==''?'#10B981':'#D1D5DB'}';this.style.background='\${row.actualFinish&&row.actualFinish!==''?'#10B981':'#F3F4F6'}';this.style.boxShadow='\${row.actualFinish&&row.actualFinish!==''?'0 2px 4px rgba(16,185,129,0.2)':'none'}'">
+          \${lucideIcon(row.actualFinish&&row.actualFinish!==''?'check-circle-2':'circle','13')}
+        </button>
+      </td>
+      <td style="text-align:center;padding:5px 10px"><button onclick="event.stopPropagation();deleteRepairRecord('\${row.id}')" title="Delete record" style="background:#F3F4F6;border:none;color:#D1D5DB;padding:4px 8px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:600;width:32px;height:32px" class="status-btn" onmouseover="this.style.color='#DC2626';this.style.background='#FEE2E2';this.style.boxShadow='0 4px 8px rgba(220,38,38,0.2)'" onmouseout="this.style.color='#D1D5DB';this.style.background='#F3F4F6';this.style.boxShadow='none'">
+        \${lucideIcon('trash-2','13')}
+      </button></td>
+    </tr>\`;
   });
 
-  html+=`</tbody></table></div>
-  <div class="repair-actions">
-    <button class="repair-btn" onclick="addRepairRecord()">➕ Add Record</button>
-    <button class="repair-btn" onclick="exportRepairData()">📥 Export CSV</button>
-  </div>`;
+  html+=\`</tbody>
+        </table>
+      </div>
+      <div class="repair-actions" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:20px;background:transparent;border-top:1px solid #E5E7EB;margin-top:12px">
+    <button class="repair-btn" onclick="addRepairRecord()" style="padding:10px 18px;border:1px solid #D1D5DB;border-radius:8px;background:white;color:var(--tx);cursor:pointer;transition:all 0.15s;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px" onmouseover="this.style.background='#F9FAFB';this.style.borderColor='#F59E0B'" onmouseout="this.style.background='white';this.style.borderColor='#D1D5DB'">➕ Add Record</button>
+    <button class="repair-btn" onclick="exportRepairData()" style="padding:10px 18px;border:1px solid #D1D5DB;border-radius:8px;background:white;color:var(--tx);cursor:pointer;transition:all 0.15s;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px" onmouseover="this.style.background='#F9FAFB';this.style.borderColor='#F59E0B'" onmouseout="this.style.background='white';this.style.borderColor='#D1D5DB'">📥 Export CSV</button>
+  </div>\`;
 
   document.getElementById('main').innerHTML=html;
   setupRepairEditHandlers();
@@ -7906,6 +7888,30 @@ function setupRepairEditHandlers(){
       });
     });
   },50);
+}
+
+function toggleRepairPaid(recordId){
+  const rec=repairStatusData.find(r=>r.id===recordId);
+  if(rec){
+    rec.paidRepair=rec.paidRepair==='YES'?'NO':'YES';
+    saveRepairData();
+    render();
+  }
+}
+
+function toggleRepairComplete(recordId){
+  const rec=repairStatusData.find(r=>r.id===recordId);
+  if(rec){
+    // Toggle actualFinish between empty and today's date
+    if(rec.actualFinish){
+      rec.actualFinish='';
+    }else{
+      const today=new Date();
+      rec.actualFinish=`${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+    }
+    saveRepairData();
+    render();
+  }
 }
 
 function saveRepairCell(input,recordId,field){
