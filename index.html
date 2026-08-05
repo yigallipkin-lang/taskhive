@@ -3488,10 +3488,16 @@ function renderTable(){
         <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
           <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
         </td>
-        <td style="text-align:center;display:flex;gap:4px;justify-content:center;align-items:center">
-          <button class="btn-delete" onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:${t.done?'#10B981':'#9CA3AF'};padding:4px 8px;font-size:11px">✓</button>
-          <button class="btn-delete" onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:${t.hidden?'#F59E0B':'#9CA3AF'};padding:4px 8px;font-size:11px">👁</button>
-          <button class="btn-delete" onclick="event.stopPropagation();toggleSnoozed('${t.id}')" title="Snooze" style="background:${t.snoozedAt?'#3B82F6':'#9CA3AF'};padding:4px 8px;font-size:11px">⏰</button>
+        <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
+          <button onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:none;border:1px solid ${t.done?'#10B981':'#D1D5DB'};color:${t.done?'#10B981':'#6B7280'};padding:4px 8px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-size:13px;width:28px;height:28px" class="status-btn" onmouseover="this.style.background='${t.done?'rgba(16,185,129,0.1)':'rgba(107,114,128,0.1)'}';this.style.borderColor='${t.done?'#10B981':'#9CA3AF'}'" onmouseout="this.style.background='none';this.style.borderColor='${t.done?'#10B981':'#D1D5DB'}'">
+            ${lucideIcon(t.done?'check-circle':'circle','16')}
+          </button>
+          <button onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:none;border:1px solid ${t.hidden?'#F59E0B':'#D1D5DB'};color:${t.hidden?'#F59E0B':'#6B7280'};padding:4px 8px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-size:13px;width:28px;height:28px" class="status-btn" onmouseover="this.style.background='${t.hidden?'rgba(245,158,11,0.1)':'rgba(107,114,128,0.1)'}';this.style.borderColor='${t.hidden?'#F59E0B':'#9CA3AF'}'" onmouseout="this.style.background='none';this.style.borderColor='${t.hidden?'#F59E0B':'#D1D5DB'}'">
+            ${lucideIcon(t.hidden?'eye-off':'eye','16')}
+          </button>
+          <button onclick="event.stopPropagation();toggleSnoozed('${t.id}')" title="Snooze" style="background:none;border:1px solid ${t.snoozedAt?'#3B82F6':'#D1D5DB'};color:${t.snoozedAt?'#3B82F6':'#6B7280'};padding:4px 8px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-size:13px;width:28px;height:28px" class="status-btn" onmouseover="this.style.background='${t.snoozedAt?'rgba(59,130,246,0.1)':'rgba(107,114,128,0.1)'}';this.style.borderColor='${t.snoozedAt?'#3B82F6':'#9CA3AF'}'" onmouseout="this.style.background='none';this.style.borderColor='${t.snoozedAt?'#3B82F6':'#D1D5DB'}'">
+            ${lucideIcon(t.snoozedAt?'clock':'clock','16')}
+          </button>
         </td>
         <td style="text-align:center">${todayHtml}</td>
       </tr>`;
@@ -3507,8 +3513,10 @@ function renderTable(){
           <td style="padding:4px 10px 4px 32px;cursor:pointer" onclick="showTaskModal('${t.id}')">
             <span style="font-size:12px;color:var(--t2)">• ${esc(s.title)}</span>
           </td>
-          <td style="text-align:center;display:flex;gap:4px;justify-content:center;align-items:center">
-            <button class="btn-delete" onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')" title="Complete" style="background:${s.done?'#10B981':'#9CA3AF'};padding:4px 8px;font-size:11px">✓</button>
+          <td style="text-align:center;display:flex;gap:6px;justify-content:center;align-items:center">
+            <button onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')" title="Complete" style="background:none;border:1px solid ${s.done?'#10B981':'#D1D5DB'};color:${s.done?'#10B981':'#6B7280'};padding:4px 8px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-size:13px;width:28px;height:28px" class="status-btn" onmouseover="this.style.background='${s.done?'rgba(16,185,129,0.1)':'rgba(107,114,128,0.1)'}';this.style.borderColor='${s.done?'#10B981':'#9CA3AF'}'" onmouseout="this.style.background='none';this.style.borderColor='${s.done?'#10B981':'#D1D5DB'}'">
+              ${lucideIcon(s.done?'check-circle':'circle','16')}
+            </button>
           </td>
           <td></td>
         </tr>`;
