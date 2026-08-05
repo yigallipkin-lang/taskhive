@@ -8347,8 +8347,8 @@ function renderProductionStatus() {
     .prod-actions { display: flex; gap: 10px; margin-bottom: 12px; }
     .btn-primary { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
     .btn-primary:hover { opacity: 0.9; }
-    .prod-table-container { background: transparent; overflow: visible; border: none; }
-    .prod-table { width: 100%; border-collapse: collapse; background: transparent; font-size: 13px; }
+    .prod-table-container { background: transparent; overflow-x: auto; border: none; display: block; }
+    .prod-table { width: auto; border-collapse: collapse; background: transparent; font-size: 13px; }
     .prod-table thead { background: transparent; }
     .prod-table th { padding: 5px 10px; text-align: left; font-weight: 600; color: var(--tx); background: transparent; border-bottom: 1px solid #D1D5DB; white-space: nowrap; border-top: 1px solid #D1D5DB; font-size: 12px; }
     .prod-table td { padding: 5px 10px; border-bottom: 1px solid #E5E7EB; vertical-align: middle; }
