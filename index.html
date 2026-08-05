@@ -3458,8 +3458,8 @@ function renderTable(){
               <th style="width: 160px;">Account</th>
               <th style="width: 160px;">Project</th>
               <th style="width: 400px;">Task</th>
-              <th style="width: 140px; text-align: center;">Status</th>
-              <th style="width: 120px;">Flag</th>
+              <th style="width: 180px; text-align: center;">Status</th>
+              <th style="width: 100px; text-align: center;">Today</th>
             </tr>
           </thead>
           <tbody>`;
@@ -3478,8 +3478,8 @@ function renderTable(){
 
     // Render all tasks in flat table
     for(const { task: t, account: a, project: p } of allTasks){
-      const flagHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:3px">
-        ${t.today ? `<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','11')}</span>` : ''}
+      const todayHtml = `<div style="display:flex;align-items:center;justify-content:center">
+        ${t.today ? `<span class="flag-badge flag-badge-today" title="Today">${lucideIcon('sun','14')}</span>` : ''}
       </div>`;
 
       html += `<tr class="task-row-styled" data-task-id="${t.id}">
@@ -3488,10 +3488,12 @@ function renderTable(){
         <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
           <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
         </td>
-        <td style="text-align:center">
-          <div class="cb ${t.done?'checked':''}" onclick="event.stopPropagation();toggleDone('${t.id}')" style="margin:auto"></div>
+        <td style="text-align:center;display:flex;gap:4px;justify-content:center;align-items:center">
+          <button class="btn-delete" onclick="event.stopPropagation();toggleDone('${t.id}')" title="Complete" style="background:${t.done?'#10B981':'#9CA3AF'};padding:4px 8px;font-size:11px">✓</button>
+          <button class="btn-delete" onclick="event.stopPropagation();toggleHidden('${t.id}')" title="Hide" style="background:${t.hidden?'#F59E0B':'#9CA3AF'};padding:4px 8px;font-size:11px">👁</button>
+          <button class="btn-delete" onclick="event.stopPropagation();toggleSnoozed('${t.id}')" title="Snooze" style="background:${t.snoozedAt?'#3B82F6':'#9CA3AF'};padding:4px 8px;font-size:11px">⏰</button>
         </td>
-        <td style="text-align:center">${flagHtml}</td>
+        <td style="text-align:center">${todayHtml}</td>
       </tr>`;
 
       // Render subtasks if any
@@ -3505,8 +3507,8 @@ function renderTable(){
           <td style="padding:4px 10px 4px 32px;cursor:pointer" onclick="showTaskModal('${t.id}')">
             <span style="font-size:12px;color:var(--t2)">• ${esc(s.title)}</span>
           </td>
-          <td style="text-align:center">
-            <div class="cb-round ${s.done?'checked':''}" style="width:16px;height:16px;border-width:1.5px;margin:auto" onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')"></div>
+          <td style="text-align:center;display:flex;gap:4px;justify-content:center;align-items:center">
+            <button class="btn-delete" onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')" title="Complete" style="background:${s.done?'#10B981':'#9CA3AF'};padding:4px 8px;font-size:11px">✓</button>
           </td>
           <td></td>
         </tr>`;
