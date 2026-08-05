@@ -2797,8 +2797,21 @@ function renderSidebar(){
 // ─── TOP BAR ──────────────────────────────────────────────────────────────────
 function renderTopBar(){
   const viewNames = {
-    kanban:'Board', table:'Table', 'proj-summary':'Projects Summary', 'project-info':'Project Info',
-    today:'Today', archive:'Archive'
+    kanban:'Board',
+    table:'Table',
+    'proj-summary':'Projects Summary',
+    'project-info':'Project Info',
+    'production-status':'Production Status',
+    'repair-status':'Repair Status',
+    'upcoming-topics':'Upcoming Topics',
+    'project-list':'Project List',
+    today:'Today',
+    archive:'Archive',
+    'archived-projects':'Archived Projects',
+    'completed-tasks':'Completed Tasks',
+    'hidden-tasks':'Hidden Tasks',
+    'snoozed-tasks':'Snoozed Tasks',
+    'production-status-board':'Production Status'
   };
   const v = state.view;
   const title = v.startsWith('p:') ? (projById(v.slice(2))?.name||'Project') : (viewNames[v]||'TaskHive');
