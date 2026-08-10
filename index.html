@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.12.2">
+<meta name="version" content="2.12.3">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -2678,21 +2678,30 @@ function restoreScrollPosition(){
   }
 }
 
+let _renderInProgress = false;
 function render(){
-  buildRenderCache();  // Build lookup maps once per render
-  buildSortCache();    // Build sorted arrays once per render
-  console.log('🎨 render() called for view:', state.view);
-  renderSidebar();
-  renderTopBar();
-  renderMain();
-  // Legacy renders (hidden, but keep state consistent)
-  renderAcctBar();
-  renderProjBar();
-  // Update data-view attribute for print CSS (for print orientation)
-  document.getElementById('app').setAttribute('data-view', state.view);
-  // Re-initialize Lucide icons after rendering
-  if(window.lucide && typeof window.lucide.createIcons === 'function'){
-    window.lucide.createIcons();
+  // Prevent render race conditions during rapid view transitions
+  if(_renderInProgress) return;
+  _renderInProgress = true;
+
+  try {
+    buildRenderCache();  // Build lookup maps once per render
+    buildSortCache();    // Build sorted arrays once per render
+    console.log('🎨 render() called for view:', state.view);
+    renderSidebar();
+    renderTopBar();
+    renderMain();
+    // Legacy renders (hidden, but keep state consistent)
+    renderAcctBar();
+    renderProjBar();
+    // Update data-view attribute for print CSS (for print orientation)
+    document.getElementById('app').setAttribute('data-view', state.view);
+    // Re-initialize Lucide icons after rendering
+    if(window.lucide && typeof window.lucide.createIcons === 'function'){
+      window.lucide.createIcons();
+    }
+  } finally {
+    _renderInProgress = false;
   }
 }
 
