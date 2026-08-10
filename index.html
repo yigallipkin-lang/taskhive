@@ -5044,13 +5044,8 @@ function renderProjectInfoDashboard(){
 // PROJECT LIST VIEW
 // ═══════════════════════════════════════════════════════════════════════════════
 function renderProjectList(){
-  console.log('🎯 renderProjectList CALLED with state.view=', state.view);
   let html = getActiveBanner();
   html += getFlagFilterBar();
-
-  // Use view-specific cache key to prevent rapid-transition cache conflicts
-  const cacheKey = 'main_' + state.view;
-  console.log('📑 renderProjectList: cacheKey=', cacheKey, 'view=', state.view, 'html starts with:', html.substring(0, 100));
 
   // Helper functions (from Project Summary View)
   const calcBudgetPercent = (spent, budget) => budget ? Math.round((spent||0)/budget*100) : 0;
@@ -5235,7 +5230,7 @@ function renderProjectList(){
     <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);background:var(--bg-subtle)">Projects: ${allProjects.length}</div>
   </div>`;
 
-  updateDOM('main', html, cacheKey);
+  updateDOM('main', html, 'main_project-list_' + Date.now());
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -8245,7 +8240,6 @@ function parseDateDDMMYY(dateStr) {
 }
 
 function renderProductionStatus() {
-  console.log('🎯 renderProductionStatus CALLED with state.view=', state.view);
   const projects = state.projects || [];
   const accounts = state.accounts || [];
   const today = new Date();
@@ -8484,7 +8478,7 @@ function renderProductionStatus() {
   }
 
   html += `</div>`;
-  updateDOM('main', html, 'main_production-status');
+  updateDOM('main', html, 'main_production-status_' + Date.now());
 }
 
 function openAddDeliveryModal() {
