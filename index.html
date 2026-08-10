@@ -2483,8 +2483,12 @@ let domCache = {
 };
 
 function updateDOM(selector, html, cacheName) {
+  const isSkipped = domCache[cacheName] === html;
+  const htmlPreview = html.substring(0, 50).replace(/\n/g, ' ');
+  console.log(`🔄 updateDOM cacheName=${cacheName} skipped=${isSkipped} htmlStart="${htmlPreview}..."`);
+
   // Skip if content hasn't changed (optimization)
-  if(domCache[cacheName] === html) {
+  if(isSkipped) {
     return;
   }
 
@@ -2497,6 +2501,7 @@ function updateDOM(selector, html, cacheName) {
   const element = document.getElementById(selector);
   if(element) {
     element.innerHTML = html;
+    console.log(`   → DOM updated for cache key ${cacheName}`);
   }
 
   // Restore focus if element still exists
@@ -5039,12 +5044,13 @@ function renderProjectInfoDashboard(){
 // PROJECT LIST VIEW
 // ═══════════════════════════════════════════════════════════════════════════════
 function renderProjectList(){
+  console.log('🎯 renderProjectList CALLED with state.view=', state.view);
   let html = getActiveBanner();
   html += getFlagFilterBar();
 
   // Use view-specific cache key to prevent rapid-transition cache conflicts
   const cacheKey = 'main_' + state.view;
-  console.log('📑 renderProjectList: cacheKey=', cacheKey, 'view=', state.view);
+  console.log('📑 renderProjectList: cacheKey=', cacheKey, 'view=', state.view, 'html starts with:', html.substring(0, 100));
 
   // Helper functions (from Project Summary View)
   const calcBudgetPercent = (spent, budget) => budget ? Math.round((spent||0)/budget*100) : 0;
@@ -8239,7 +8245,7 @@ function parseDateDDMMYY(dateStr) {
 }
 
 function renderProductionStatus() {
-  console.log('📦 renderProductionStatus called, state.view=', state.view);
+  console.log('🎯 renderProductionStatus CALLED with state.view=', state.view);
   const projects = state.projects || [];
   const accounts = state.accounts || [];
   const today = new Date();
