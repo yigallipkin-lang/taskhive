@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.12.5">
+<meta name="version" content="2.12.6">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -2483,12 +2483,10 @@ let domCache = {
 };
 
 function updateDOM(selector, html, cacheName) {
-  // DISABLED: Skip cache during rapid transitions to prevent state mismatches
-  // The cache was causing issues when views changed rapidly - the cached content
-  // from one view would prevent another view from updating the DOM
-  // if(domCache[cacheName] === html) {
-  //   return;
-  // }
+  // Skip if content hasn't changed (optimization)
+  if(domCache[cacheName] === html) {
+    return;
+  }
 
   // Preserve focus state
   const activeElement = document.activeElement;
@@ -2509,7 +2507,7 @@ function updateDOM(selector, html, cacheName) {
     }
   }
 
-  // Cache the update (but not used currently due to rapid-transition issues)
+  // Cache the update
   domCache[cacheName] = html;
 }
 
@@ -2681,38 +2679,23 @@ function restoreScrollPosition(){
 }
 
 let _renderInProgress = false;
-let _lastRenderedView = null;
 function render(){
   // Prevent render race conditions during rapid view transitions
   if(_renderInProgress) return;
   _renderInProgress = true;
 
   try {
-    // Track which view we're rendering to prevent stale content
-    const currentView = state.view;
-    _lastRenderedView = currentView;
-
     buildRenderCache();  // Build lookup maps once per render
     buildSortCache();    // Build sorted arrays once per render
-    console.log('🎨 render() called for view:', currentView);
-
-    // Clear main element before rendering to prevent stale content
-    const mainEl = document.getElementById('main');
-    if(mainEl) mainEl.innerHTML = '';
-
+    console.log('🎨 render() called for view:', state.view);
     renderSidebar();
     renderTopBar();
-
-    // Only render main if view hasn't changed
-    if(state.view === currentView) {
-      renderMain();
-    }
-
+    renderMain();
     // Legacy renders (hidden, but keep state consistent)
     renderAcctBar();
     renderProjBar();
     // Update data-view attribute for print CSS (for print orientation)
-    document.getElementById('app').setAttribute('data-view', currentView);
+    document.getElementById('app').setAttribute('data-view', state.view);
     // Re-initialize Lucide icons after rendering
     if(window.lucide && typeof window.lucide.createIcons === 'function'){
       window.lucide.createIcons();
