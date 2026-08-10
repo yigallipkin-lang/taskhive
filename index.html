@@ -5059,6 +5059,7 @@ function renderProjectList(){
 
   // Use view-specific cache key to prevent rapid-transition cache conflicts
   const cacheKey = 'main_' + state.view;
+  console.log('📑 renderProjectList: cacheKey=', cacheKey, 'view=', state.view);
 
   // Helper functions (from Project Summary View)
   const calcBudgetPercent = (spent, budget) => budget ? Math.round((spent||0)/budget*100) : 0;
@@ -8253,6 +8254,7 @@ function parseDateDDMMYY(dateStr) {
 }
 
 function renderProductionStatus() {
+  console.log('📦 renderProductionStatus called, state.view=', state.view);
   const projects = state.projects || [];
   const accounts = state.accounts || [];
   const today = new Date();
