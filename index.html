@@ -2679,23 +2679,38 @@ function restoreScrollPosition(){
 }
 
 let _renderInProgress = false;
+let _lastRenderedView = null;
 function render(){
   // Prevent render race conditions during rapid view transitions
   if(_renderInProgress) return;
   _renderInProgress = true;
 
   try {
+    // Track which view we're rendering to prevent stale content
+    const currentView = state.view;
+    _lastRenderedView = currentView;
+
     buildRenderCache();  // Build lookup maps once per render
     buildSortCache();    // Build sorted arrays once per render
-    console.log('🎨 render() called for view:', state.view);
+    console.log('🎨 render() called for view:', currentView);
+
+    // Clear main element before rendering to prevent stale content
+    const mainEl = document.getElementById('main');
+    if(mainEl) mainEl.innerHTML = '';
+
     renderSidebar();
     renderTopBar();
-    renderMain();
+
+    // Only render main if view hasn't changed
+    if(state.view === currentView) {
+      renderMain();
+    }
+
     // Legacy renders (hidden, but keep state consistent)
     renderAcctBar();
     renderProjBar();
     // Update data-view attribute for print CSS (for print orientation)
-    document.getElementById('app').setAttribute('data-view', state.view);
+    document.getElementById('app').setAttribute('data-view', currentView);
     // Re-initialize Lucide icons after rendering
     if(window.lucide && typeof window.lucide.createIcons === 'function'){
       window.lucide.createIcons();
