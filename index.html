@@ -2483,12 +2483,8 @@ let domCache = {
 };
 
 function updateDOM(selector, html, cacheName) {
-  const isSkipped = domCache[cacheName] === html;
-  const htmlPreview = html.substring(0, 50).replace(/\n/g, ' ');
-  console.log(`🔄 updateDOM cacheName=${cacheName} skipped=${isSkipped} htmlStart="${htmlPreview}..."`);
-
   // Skip if content hasn't changed (optimization)
-  if(isSkipped) {
+  if(domCache[cacheName] === html) {
     return;
   }
 
@@ -2501,7 +2497,6 @@ function updateDOM(selector, html, cacheName) {
   const element = document.getElementById(selector);
   if(element) {
     element.innerHTML = html;
-    console.log(`   → DOM updated for cache key ${cacheName}`);
   }
 
   // Restore focus if element still exists
@@ -3546,7 +3541,7 @@ function renderTable(){
     </div>`;
   }
 
-  updateDOM('main', html, 'main_kanban');
+  document.getElementById('main').innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -5230,7 +5225,8 @@ function renderProjectList(){
     <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);background:var(--bg-subtle)">Projects: ${allProjects.length}</div>
   </div>`;
 
-  updateDOM('main', html, 'main_project-list_' + Date.now());
+  const elem = document.getElementById('main');
+  if(elem) elem.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -7816,7 +7812,7 @@ function renderRepairStatus(){
   </div>
   </div>`;
 
-  updateDOM('main', html, 'main_repair-status');
+  document.getElementById('main').innerHTML = html;
   setupRepairEditHandlers();
 }
 
@@ -8136,7 +8132,7 @@ function renderUpcomingTopicsTable() {
   }
 
   html += '</div>';
-  updateDOM('main', html, 'main_upcoming-topics');
+  document.getElementById('main').innerHTML = html;
 }
 
 window.renderUpcomingTopicsTable = renderUpcomingTopicsTable;
@@ -8478,7 +8474,8 @@ function renderProductionStatus() {
   }
 
   html += `</div>`;
-  updateDOM('main', html, 'main_production-status_' + Date.now());
+  const elem = document.getElementById('main');
+  if(elem) elem.innerHTML = html;
 }
 
 function openAddDeliveryModal() {
