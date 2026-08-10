@@ -1317,7 +1317,7 @@ let state = {
   flt: {u:false,f:false,t:false}, projectTab: 'tasks',
   collapsed: {accounts: {}, projects: {}, tasks: {}, 'table-accts': {}, 'table-projs': {}, 'table-tasks': {}},
   budgetCurrency: 'USD',
-  projectListColumns: {programNo: true, projectName: true, description: false, lnContractNo: true, progress: true, budget: true}
+  projectListColumns: {programNo: true, projectName: true, description: false, lnContractNo: true, devMgr: false, sysEng: false, salesMgr: false, qaMgr: false, progress: true, budget: true}
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2883,6 +2883,10 @@ function toggleColumnMenu(e){
     <div class="column-menu-item"><label><input type="checkbox" ${cols.projectName?'checked':''} onchange="handleColumnToggle('projectName')"> Project Name</label></div>
     <div class="column-menu-item"><label><input type="checkbox" ${cols.description?'checked':''} onchange="handleColumnToggle('description')"> Description</label></div>
     <div class="column-menu-item"><label><input type="checkbox" ${cols.lnContractNo?'checked':''} onchange="handleColumnToggle('lnContractNo')"> LN Contract No.</label></div>
+    <div class="column-menu-item"><label><input type="checkbox" ${cols.devMgr?'checked':''} onchange="handleColumnToggle('devMgr')"> Dev. Mgr.</label></div>
+    <div class="column-menu-item"><label><input type="checkbox" ${cols.sysEng?'checked':''} onchange="handleColumnToggle('sysEng')"> Sys. Eng.</label></div>
+    <div class="column-menu-item"><label><input type="checkbox" ${cols.salesMgr?'checked':''} onchange="handleColumnToggle('salesMgr')"> Sales Mgr.</label></div>
+    <div class="column-menu-item"><label><input type="checkbox" ${cols.qaMgr?'checked':''} onchange="handleColumnToggle('qaMgr')"> QA Mgr.</label></div>
     <div class="column-menu-item"><label><input type="checkbox" ${cols.progress?'checked':''} onchange="handleColumnToggle('progress')"> Progress</label></div>
     <div class="column-menu-item"><label><input type="checkbox" ${cols.budget?'checked':''} onchange="handleColumnToggle('budget')"> Budget</label></div>
   </div>`;
@@ -5079,6 +5083,10 @@ function renderProjectList(){
   if(cols.projectName) desktopCols.push('projectName');
   if(cols.description) desktopCols.push('description');
   if(cols.lnContractNo) desktopCols.push('lnContractNo');
+  if(cols.devMgr) desktopCols.push('devMgr');
+  if(cols.sysEng) desktopCols.push('sysEng');
+  if(cols.salesMgr) desktopCols.push('salesMgr');
+  if(cols.qaMgr) desktopCols.push('qaMgr');
   if(cols.progress) desktopCols.push('progress');
   if(cols.budget) desktopCols.push('budget');
   const numDesktopCols = desktopCols.length;
@@ -5097,6 +5105,10 @@ function renderProjectList(){
             if(col === 'account') return '<col style="width:12%">';
             if(col === 'description') return '<col style="width:20%">';
             if(col === 'lnContractNo') return '<col style="width:10%">';
+            if(col === 'devMgr') return '<col style="width:9%">';
+            if(col === 'sysEng') return '<col style="width:9%">';
+            if(col === 'salesMgr') return '<col style="width:9%">';
+            if(col === 'qaMgr') return '<col style="width:9%">';
             return '<col style="width:8%">';
           }).join('')}
         </colgroup>
@@ -5114,6 +5126,10 @@ function renderProjectList(){
                 'projectName': 'Project Name',
                 'description': 'Description',
                 'lnContractNo': 'LN Contract No.',
+                'devMgr': 'Dev. Mgr.',
+                'sysEng': 'Sys. Eng.',
+                'salesMgr': 'Sales Mgr.',
+                'qaMgr': 'QA Mgr.',
                 'progress': 'Progress',
                 'budget': 'Budget'
               };
@@ -5184,6 +5200,26 @@ function renderProjectList(){
           else if(col === 'lnContractNo'){
             cellsHtml += `<td style="${cellStyle};color:var(--tx)">
               <div class="proj-list-cell" contenteditable="true" onblur="updateProjectField('${p.id}','projectInfo.lnContractNo',this.textContent)" onkeydown="if(event.key==='Enter')this.blur();event.stopPropagation()" onclick="event.stopPropagation()" style="padding:2px;border:none;border-bottom:1px solid #e0e0e0;outline:none;cursor:text;min-height:18px;border-radius:2px">${esc(lnContractNo)}</div>
+            </td>`;
+          }
+          else if(col === 'devMgr'){
+            cellsHtml += `<td style="${cellStyle};color:var(--tx)">
+              <div class="proj-list-cell" contenteditable="true" onblur="updateProjectField('${p.id}','projectInfo.devMgr',this.textContent)" onkeydown="if(event.key==='Enter')this.blur();event.stopPropagation()" onclick="event.stopPropagation()" style="padding:2px;border:none;border-bottom:1px solid #e0e0e0;outline:none;cursor:text;min-height:18px;border-radius:2px">${esc(p.projectInfo?.devMgr || '')}</div>
+            </td>`;
+          }
+          else if(col === 'sysEng'){
+            cellsHtml += `<td style="${cellStyle};color:var(--tx)">
+              <div class="proj-list-cell" contenteditable="true" onblur="updateProjectField('${p.id}','projectInfo.sysEng',this.textContent)" onkeydown="if(event.key==='Enter')this.blur();event.stopPropagation()" onclick="event.stopPropagation()" style="padding:2px;border:none;border-bottom:1px solid #e0e0e0;outline:none;cursor:text;min-height:18px;border-radius:2px">${esc(p.projectInfo?.sysEng || '')}</div>
+            </td>`;
+          }
+          else if(col === 'salesMgr'){
+            cellsHtml += `<td style="${cellStyle};color:var(--tx)">
+              <div class="proj-list-cell" contenteditable="true" onblur="updateProjectField('${p.id}','projectInfo.salesMgr',this.textContent)" onkeydown="if(event.key==='Enter')this.blur();event.stopPropagation()" onclick="event.stopPropagation()" style="padding:2px;border:none;border-bottom:1px solid #e0e0e0;outline:none;cursor:text;min-height:18px;border-radius:2px">${esc(p.projectInfo?.salesMgr || '')}</div>
+            </td>`;
+          }
+          else if(col === 'qaMgr'){
+            cellsHtml += `<td style="${cellStyle};color:var(--tx)">
+              <div class="proj-list-cell" contenteditable="true" onblur="updateProjectField('${p.id}','projectInfo.qaMgr',this.textContent)" onkeydown="if(event.key==='Enter')this.blur();event.stopPropagation()" onclick="event.stopPropagation()" style="padding:2px;border:none;border-bottom:1px solid #e0e0e0;outline:none;cursor:text;min-height:18px;border-radius:2px">${esc(p.projectInfo?.qaMgr || '')}</div>
             </td>`;
           }
           else if(col === 'progress'){
@@ -6877,7 +6913,7 @@ function exportTableViewCSV(){
 function exportProjectListCSV(){
   const lines = [];
 
-  lines.push('Account,Project,Color,Description,Start Date,End Date,Budget,Status');
+  lines.push('Account,Program No.,Project Name,Description,LN Contract No.,Dev. Mgr.,Sys. Eng.,Sales Mgr.,QA Mgr.,Start Date,End Date,Budget,Status');
 
   const accounts = _sortCache.accountsSorted||state.accounts||[];
 
@@ -6887,11 +6923,17 @@ function exportProjectListCSV(){
     let projs = state.projects.filter(p=>p.accountId===a.id).sort((x,y)=>(x.order||0)-(y.order||0));
 
     for(const p of projs){
+      const info = p.projectInfo || {};
       lines.push([
         a.name,
+        info.programNo||'',
         p.name,
-        p.color||'',
         p.description||'',
+        info.lnContractNo||'',
+        info.devMgr||'',
+        info.sysEng||'',
+        info.salesMgr||'',
+        info.qaMgr||'',
         p.startDate||'',
         p.endDate||'',
         p.budget||'',
@@ -8754,8 +8796,12 @@ function exportCurrentView() {
     exportTopics();
   } else if (view === 'production-status') {
     exportProductionCSV();
+  } else if (view === 'project-list') {
+    exportProjectListCSV();
   } else if (view === 'repair-status') {
     exportRepairData?.();
+  } else if (view === 'table') {
+    exportTableViewCSV();
   } else {
     alert('Export not available for this view');
   }
