@@ -3541,7 +3541,7 @@ function renderTable(){
     </div>`;
   }
 
-  document.getElementById('main').innerHTML = html;
+  updateDOM('main', html, 'main_kanban');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -7815,7 +7815,7 @@ function renderRepairStatus(){
   </div>
   </div>`;
 
-  document.getElementById('main').innerHTML=html;
+  updateDOM('main', html, 'main_repair-status');
   setupRepairEditHandlers();
 }
 
@@ -8135,7 +8135,7 @@ function renderUpcomingTopicsTable() {
   }
 
   html += '</div>';
-  document.getElementById('main').innerHTML = html;
+  updateDOM('main', html, 'main_upcoming-topics');
 }
 
 window.renderUpcomingTopicsTable = renderUpcomingTopicsTable;
