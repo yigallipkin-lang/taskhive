@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.12.3">
+<meta name="version" content="2.12.4">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -3350,7 +3350,7 @@ function renderKanban(){
 
   html += `<div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);background:var(--bg-subtle)">Tasks: ${taskCount}</div>`;
   html += '</div>'; // Close kanban-wrap
-  updateDOM('main', html, 'main');
+  updateDOM('main', html, 'main_kanban');
   setupKanbanScrolling();
   bindDragEvents();
 }
@@ -3667,7 +3667,7 @@ function renderSnoozedTable(){
       </table>
       <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);background:var(--bg-subtle)">Snoozed: ${tasks.length}</div>
     </div>`;
-  updateDOM('main', mainHtml, 'main');
+  updateDOM('main', mainHtml, 'main_snoozed');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -3771,7 +3771,7 @@ function renderCompletedTable(){
       </table>
       <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);background:var(--bg-subtle)">Completed: ${tasks.length}</div>
     </div>`;
-  updateDOM('main', mainHtml, 'main');
+  updateDOM('main', mainHtml, 'main_archive');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -3874,7 +3874,7 @@ function renderHiddenTable(){
       </table>
       <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);background:var(--bg-subtle)">Hidden: ${tasks.length}</div>
     </div>`;
-  updateDOM('main', mainHtml, 'main');
+  updateDOM('main', mainHtml, 'main_hidden');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -4272,7 +4272,7 @@ function renderProjSummary(){
   }
 
   html += `</div></div>`;
-  updateDOM('main', html, 'main');
+  updateDOM('main', html, 'main_proj-summary');
 
   // Setup filter modal click handler
   setTimeout(() => {
@@ -5057,6 +5057,9 @@ function renderProjectList(){
   let html = getActiveBanner();
   html += getFlagFilterBar();
 
+  // Use view-specific cache key to prevent rapid-transition cache conflicts
+  const cacheKey = 'main_' + state.view;
+
   // Helper functions (from Project Summary View)
   const calcBudgetPercent = (spent, budget) => budget ? Math.round((spent||0)/budget*100) : 0;
   const getBudgetColor = (percent) => {
@@ -5240,7 +5243,7 @@ function renderProjectList(){
     <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);background:var(--bg-subtle)">Projects: ${allProjects.length}</div>
   </div>`;
 
-  updateDOM('main', html, 'main');
+  updateDOM('main', html, cacheKey);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
