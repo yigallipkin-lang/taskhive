@@ -8478,7 +8478,7 @@ function renderProductionStatus() {
   }
 
   html += `</div>`;
-  document.getElementById('main').innerHTML = html;
+  updateDOM('main', html, 'main_production-status');
 }
 
 function openAddDeliveryModal() {
