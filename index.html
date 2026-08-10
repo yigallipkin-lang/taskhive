@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.12.4">
+<meta name="version" content="2.12.5">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -2483,10 +2483,12 @@ let domCache = {
 };
 
 function updateDOM(selector, html, cacheName) {
-  // Skip if content hasn't changed (optimization)
-  if(domCache[cacheName] === html) {
-    return;
-  }
+  // DISABLED: Skip cache during rapid transitions to prevent state mismatches
+  // The cache was causing issues when views changed rapidly - the cached content
+  // from one view would prevent another view from updating the DOM
+  // if(domCache[cacheName] === html) {
+  //   return;
+  // }
 
   // Preserve focus state
   const activeElement = document.activeElement;
@@ -2507,7 +2509,7 @@ function updateDOM(selector, html, cacheName) {
     }
   }
 
-  // Cache the update
+  // Cache the update (but not used currently due to rapid-transition issues)
   domCache[cacheName] = html;
 }
 
