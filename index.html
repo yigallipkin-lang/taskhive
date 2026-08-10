@@ -6392,17 +6392,12 @@ function toggleToday(id){
   t.updated = Date.now();
   sv();
   syncTaskToFirebase(t);
-  // Re-render table view to auto-sort by today marker
-  if(state.view === 'table') {
-    renderTable();
-  } else {
-    // Update DOM directly without re-rendering in other views to prevent reordering
-    const row = document.querySelector(`[data-task-id="${id}"]`);
-    if(row){
-      const btn = row.querySelector('.today-btn');
-      if(btn){
-        btn.style.background = t.today ? '#F59E0B' : '#F3F4F6';
-      }
+  // Update DOM directly without re-rendering to prevent task reordering
+  const row = document.querySelector(`[data-task-id="${id}"]`);
+  if(row){
+    const btn = row.querySelector('.today-btn');
+    if(btn){
+      btn.style.background = t.today ? '#F59E0B' : '#F3F4F6';
     }
   }
 }
