@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.12.6">
+<meta name="version" content="2.12.7">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -2841,7 +2841,7 @@ function renderTopBar(){
     <div class="topbar-button-group">
       ${(v === 'table' || v === 'project-list') ? `<button class="topbar-btn" onclick="toggleColumnMenu(event)" title="Toggle columns"><span style="display:flex;align-items:center;gap:6px">${lucideIcon('columns-2','14')} Columns</span></button>` : ''}
       <button class="topbar-btn" onclick="printCurrentView()" title="Print current view">${lucideIcon('printer','14')} Print</button>
-      ${(['table','project-list','upcoming-topics','production-status','repair-status'].includes(v)) ? `<button class="topbar-btn" onclick="exportCurrentView()" title="Export CSV">${lucideIcon('download','14')} Export</button>` : ''}
+      ${(['table','project-list','project-info','upcoming-topics','production-status','repair-status'].includes(v)) ? `<button class="topbar-btn" onclick="exportCurrentView()" title="Export CSV">${lucideIcon('download','14')} Export</button>` : ''}
       <label class="topbar-btn" style="cursor:pointer" title="Import CSV">${lucideIcon('upload','14')} Import<input type="file" accept=".csv" style="display:none" onchange="handleImport(event)"></label>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">${lucideIcon(themeIcon,'18')}</button>
     </div>
@@ -6960,6 +6960,52 @@ function exportProjectListCSV(){
   toast('Projects exported ✓');
 }
 
+function exportProjectInfoCSV(){
+  const lines = [];
+
+  lines.push('Account,Program No.,Project Name,Description,LN Contract No.,Dev. Mgr.,Sys. Eng.,Sales Mgr.,QA Mgr.,ILS Mgr.,Start Date,End Date,Budget,Status,Info Blocks');
+
+  const accounts = _sortCache.accountsSorted||state.accounts||[];
+
+  for(const a of accounts){
+    if(state.selAcct && a.id!==state.selAcct) continue;
+
+    let projs = state.projects.filter(p=>p.accountId===a.id).sort((x,y)=>(x.order||0)-(y.order||0));
+
+    for(const p of projs){
+      if(state.selProj && p.id!==state.selProj) continue;
+
+      const info = p.projectInfo || {};
+      const infoBlocksSummary = (p.infoBlocks||[]).map(b=>b.title).join('; ');
+
+      lines.push([
+        a.name,
+        info.programNo||'',
+        p.name,
+        p.description||'',
+        info.lnContractNo||'',
+        info.devMgr||'',
+        info.sysEng||'',
+        info.salesMgr||'',
+        info.qaMgr||'',
+        info.ilsMgr||'',
+        p.startDate||'',
+        p.endDate||'',
+        p.budget||'',
+        p.scheduleStatus||'on-track',
+        infoBlocksSummary
+      ].map(csvEscField).join(','));
+    }
+  }
+
+  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `project-info-${todayStr()}.csv`;
+  a.click();
+  toast('Project info exported ✓');
+}
+
 function parseCSVLine(line){
   const fields=[]; let f='', inQ=false;
   for(let i=0;i<line.length;i++){
@@ -8795,6 +8841,7 @@ window.deleteProjectDelivery = deleteProjectDelivery;
 window.updateProjectDelivery = updateProjectDelivery;
 window.duplicateDelivery = duplicateDelivery;
 window.exportProductionCSV = exportProductionCSV;
+window.exportProjectInfoCSV = exportProjectInfoCSV;
 window.getDeliveryStatus = getDeliveryStatus;
 window.formatDateDDMMYY = formatDateDDMMYY;
 window.parseDateDDMMYY = parseDateDDMMYY;
@@ -8808,6 +8855,8 @@ function exportCurrentView() {
     exportProductionCSV();
   } else if (view === 'project-list') {
     exportProjectListCSV();
+  } else if (view === 'project-info') {
+    exportProjectInfoCSV();
   } else if (view === 'repair-status') {
     exportRepairData?.();
   } else if (view === 'table') {
