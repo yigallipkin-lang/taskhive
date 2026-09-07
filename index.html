@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.13.0">
+<meta name="version" content="2.14.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -721,6 +721,14 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .sub-flags{display:flex;gap:2px;flex-shrink:0}
 .flag-btn{padding:3px 6px;border-radius:4px;border:1px solid var(--silver2);background:var(--sf);color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
 .flag-btn.on-today{background:#ECFDF5;border-color:var(--grn);color:var(--grn)}
+.flag-btn.on-hide{background:#FEE2E2;border-color:#EF4444;color:#DC2626}
+.flag-btn.on-snooze{background:#FEF3C7;border-color:#F59E0B;color:#D97706}
+.flag-dot.flag-hidden{display:inline-block;width:4px;height:4px;border-radius:50%;background:#EF4444}
+.flag-dot.flag-snoozed{display:inline-block;width:4px;height:4px;border-radius:50%;background:#F59E0B}
+.subtask-item.subtask-hidden{opacity:.5;text-decoration:line-through}
+.subtask-item.subtask-snoozed{opacity:.6;text-decoration:line-through}
+.subtask-item .subtask-actions{margin-left:auto;opacity:0;transition:opacity .15s}
+.subtask-item:hover .subtask-actions{opacity:1}
 .btn-add-sub{font-size:12px;color:var(--honey-d);font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px}
 .modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--silver2)}
 .btn-primary{background:var(--accent);color:#fff;padding:10px 22px;border-radius:var(--radius);font-weight:600;font-size:14px;transition:all .2s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden}
@@ -3138,12 +3146,12 @@ function taskCardHtml(t, opts={}){
   if(hasSubs){
     // In Kanban, only show active (not done) subtasks unless viewing Archive
     const isArchive = state.view === 'archive';
-    const activeSubs = isArchive ? (t.subs||[]).filter(s => s.done) : (t.subs||[]).filter(s => !s.done);
+    const activeSubs = isArchive ? (t.subs||[]).filter(s => s.done) : (t.subs||[]).filter(s => !s.done && !s.hidden && !s.snoozedAt);
     const visibleSubs = activeSubs.slice(0, 2);
     const hiddenCount = Math.max(0, activeSubs.length - 2);
     subsHtml = `
       <div class="subtask-preview" data-task-subs="${t.id}">
-        ${visibleSubs.map(s => subtaskCardHtml(s)).join('')}
+        ${visibleSubs.map(s => subtaskCardHtml(s, t.id)).join('')}
         ${hiddenCount > 0 ? `<div class="subtask-item-more">+${hiddenCount} more</div>` : ''}
       </div>`;
   }
@@ -3169,13 +3177,20 @@ function taskCardHtml(t, opts={}){
 // ═══════════════════════════════════════════════════════════════════════════════
 // SUBTASK CARD HTML (for Kanban inline display)
 // ═══════════════════════════════════════════════════════════════════════════════
-function subtaskCardHtml(s){
+function subtaskCardHtml(s, taskId){
   const flagHtml = `
     ${s.today ? '<span class="flag-dot flag-today" title="Today"></span>' : ''}
+    ${s.hidden ? '<span class="flag-dot flag-hidden" title="Hidden"></span>' : ''}
+    ${s.snoozedAt ? '<span class="flag-dot flag-snoozed" title="Snoozed"></span>' : ''}
   `;
-  return `<div class="subtask-item ${s.done?'done-text':''}">
+  return `<div class="subtask-item ${s.done?'done-text':''} ${s.hidden?'subtask-hidden':''} ${s.snoozedAt?'subtask-snoozed':''}" data-task-id="${taskId}" data-sub-id="${s.id}">
     <span class="flag-dots">${flagHtml}</span>
     <span class="sub-title">${esc(s.title)}</span>
+    <div class="subtask-actions" style="display:flex;gap:2px;font-size:11px">
+      <button onclick="event.stopPropagation();toggleSubtaskDone('${taskId}','${s.id}')" title="Complete" style="cursor:pointer;background:none;border:none;padding:2px;opacity:.7">${lucideIcon('check','12')}</button>
+      <button onclick="event.stopPropagation();toggleSubtaskHidden('${taskId}','${s.id}')" title="Hide" style="cursor:pointer;background:none;border:none;padding:2px;opacity:.7">${lucideIcon('eye-off','12')}</button>
+      <button onclick="event.stopPropagation();toggleSubtaskSnoozed('${taskId}','${s.id}')" title="Snooze" style="cursor:pointer;background:none;border:none;padding:2px;opacity:.7">${lucideIcon('clock','12')}</button>
+    </div>
   </div>`;
 }
 
@@ -3561,7 +3576,7 @@ function renderTable(){
 
       // Render subtasks if any
       const hasSubs = t.subs && t.subs.length > 0;
-      const activeSubs = hasSubs ? t.subs.filter(s => !s.done) : [];
+      const activeSubs = hasSubs ? t.subs.filter(s => !s.done && !s.hidden && !s.snoozedAt) : [];
 
       for(const s of activeSubs){
         html += `<tr class="task-row-styled" data-task-id="${t.id}" data-sub-id="${s.id}" style="background:var(--bg-hover)">
@@ -3571,7 +3586,11 @@ function renderTable(){
             <span style="font-size:12px;color:var(--t2)">• ${esc(s.title)}</span>
           </td>
           <td style="text-align:center">
-            <div class="cb-round ${s.done?'checked':''}" style="width:16px;height:16px;border-width:1.5px;margin:auto" onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')"></div>
+            <div style="display:flex;gap:4px;justify-content:center">
+              <div class="cb-round ${s.done?'checked':''}" style="width:16px;height:16px;border-width:1.5px" onclick="event.stopPropagation();toggleSubtaskDone('${t.id}','${s.id}')"></div>
+              <button onclick="event.stopPropagation();toggleSubtaskHidden('${t.id}','${s.id}')" title="Hide" style="background:${s.hidden?'#F59E0B':'#F3F4F6'};border:none;padding:2px 4px;border-radius:4px;cursor:pointer;display:flex;align-items:center;width:24px;height:24px">${lucideIcon(s.hidden?'eye-off':'eye','11')}</button>
+              <button onclick="event.stopPropagation();toggleSubtaskSnoozed('${t.id}','${s.id}')" title="Snooze" style="background:${s.snoozedAt?'#3B82F6':'#F3F4F6'};border:none;padding:2px 4px;border-radius:4px;cursor:pointer;display:flex;align-items:center;width:24px;height:24px">${lucideIcon(s.snoozedAt?'clock':'clock','11')}</button>
+            </div>
           </td>
           <td></td>
         </tr>`;
@@ -6293,11 +6312,13 @@ function showTaskModal(id, defaults){
     return `<option value="${p.id}" ${data.projectId===p.id?'selected':''}>${esc(p.name)}${a?` (${esc(a.name)})`:''}</option>`;
   }).join('');
   const subs = (t?.subs||[]).map(s=>`
-    <div class="subtask-row" data-sub-id="${s.id}">
+    <div class="subtask-row" data-sub-id="${s.id}" data-hidden="${s.hidden?'1':'0'}" data-snoozed="${s.snoozedAt?'1':'0'}">
       <div class="cb ${s.done?'checked':''}" onclick="toggleSubInModal(this,'${s.id}')"></div>
-      <input value="${esc(s.title)}" placeholder="Subtask..." data-sub-title="${s.id}">
+      <input value="${esc(s.title)}" placeholder="Subtask..." data-sub-title="${s.id}" style="${s.hidden?'opacity:.5':''}${s.snoozedAt?';text-decoration:line-through':''}">
       <div class="sub-flags" style="display:flex;gap:2px">
         <button class="flag-btn sub-today ${s.today?'on-today':''}" onclick="event.stopPropagation();this.classList.toggle('on-today')" title="Today">${lucideIcon('sun','14')}</button>
+        <button class="flag-btn sub-hide ${s.hidden?'on-hide':''}" onclick="event.stopPropagation();this.classList.toggle('on-hide')" title="Hide">${lucideIcon('eye-off','14')}</button>
+        <button class="flag-btn sub-snooze ${s.snoozedAt?'on-snooze':''}" onclick="event.stopPropagation();this.classList.toggle('on-snooze')" title="Snooze">${lucideIcon('clock','14')}</button>
       </div>
       <button class="subtask-del" onclick="this.closest('.subtask-row').remove()">${lucideIcon('x','14')}</button>
     </div>`).join('');
@@ -6375,10 +6396,14 @@ function addSubtaskRow(){
   const row = document.createElement('div');
   row.className = 'subtask-row';
   row.dataset.subId = uid();
+  row.dataset.hidden = '0';
+  row.dataset.snoozed = '0';
   row.innerHTML = `<div class="cb" onclick="toggleSubInModal(this,'${row.dataset.subId}')"></div>
     <input placeholder="Subtask..." data-sub-title="${row.dataset.subId}">
     <div class="sub-flags" style="display:flex;gap:2px">
       <button class="flag-btn sub-today" onclick="event.stopPropagation();this.classList.toggle('on-today')" title="Today">${lucideIcon('sun','14')}</button>
+      <button class="flag-btn sub-hide" onclick="event.stopPropagation();this.classList.toggle('on-hide'); this.closest('.subtask-row').dataset.hidden=this.classList.contains('on-hide')?'1':'0'; this.closest('.subtask-row').querySelector('input').style.opacity=this.classList.contains('on-hide')?'.5':'1'" title="Hide">${lucideIcon('eye-off','14')}</button>
+      <button class="flag-btn sub-snooze" onclick="event.stopPropagation();this.classList.toggle('on-snooze'); this.closest('.subtask-row').dataset.snoozed=this.classList.contains('on-snooze')?'1':'0'; this.closest('.subtask-row').querySelector('input').style.textDecoration=this.classList.contains('on-snooze')?'line-through':'none'" title="Snooze">${lucideIcon('clock','14')}</button>
     </div>
     <button class="subtask-del" onclick="this.closest('.subtask-row').remove()">${lucideIcon('x','14')}</button>`;
   document.getElementById('sub-list').appendChild(row);
@@ -6413,7 +6438,9 @@ function saveTask(id){
     const inp = row.querySelector(`input[data-sub-title]`);
     const done = row.querySelector('.cb')?.classList.contains('checked')||false;
     const subToday = row.querySelector('.sub-today')?.classList.contains('on-today')||false;
-    return {id:subId, title:inp?.value.trim()||'', done, today:subToday};
+    const hidden = row.querySelector('.sub-hide')?.classList.contains('on-hide')||false;
+    const snoozed = row.querySelector('.sub-snooze')?.classList.contains('on-snooze')||false;
+    return {id:subId, title:inp?.value.trim()||'', done, today:subToday, hidden, snoozedAt:snoozed?Date.now():null};
   }).filter(s=>s.title);
 
   let t;
@@ -6509,6 +6536,26 @@ function toggleSubtaskDone(taskId, subId){
   const t = taskById(taskId); if(!t || !t.subs) return;
   const s = t.subs.find(x=>x.id===subId); if(!s) return;
   s.done = !s.done;
+  sv();
+  syncTaskToFirebase(t);
+  render();
+}
+
+function toggleSubtaskHidden(taskId, subId){
+  const t = taskById(taskId); if(!t || !t.subs) return;
+  const s = t.subs.find(x=>x.id===subId); if(!s) return;
+  s.hidden = !s.hidden;
+  t.updated = Date.now();
+  sv();
+  syncTaskToFirebase(t);
+  render();
+}
+
+function toggleSubtaskSnoozed(taskId, subId){
+  const t = taskById(taskId); if(!t || !t.subs) return;
+  const s = t.subs.find(x=>x.id===subId); if(!s) return;
+  s.snoozedAt = s.snoozedAt ? null : Date.now();
+  t.updated = Date.now();
   sv();
   syncTaskToFirebase(t);
   render();
