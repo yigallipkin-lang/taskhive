@@ -3251,7 +3251,7 @@ function renderKanban(){
   if(state.selAcct) accounts = accounts.filter(a=>a.id===state.selAcct);
 
   // Check if filter chips are active
-  const hasFilters = state.flt.t || state.flt.s;
+  const hasFilters = state.flt.t || state.flt.s || state.flt.taskType !== 'all';
   const curView = state.view;
   const td = todayStr();
 
@@ -3266,6 +3266,8 @@ function renderKanban(){
   function matchesAllFilters(t){
     if(!t || t.done || t.hidden || t.snoozedAt) return false; // Always exclude hidden and snoozed tasks
     if(state.flt.t && !(t.today || t.due === td)) return false;
+    if(state.flt.taskType === 'action' && (t.taskType||'action') === 'follow-up') return false;
+    if(state.flt.taskType === 'follow-up' && (t.taskType||'action') !== 'follow-up') return false;
     return true;
   }
 
