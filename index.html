@@ -708,8 +708,6 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .task-type-btn{flex:1;padding:8px;border-radius:var(--radius);font-size:13px;font-weight:600;border:1px solid var(--border);color:var(--t3);background:var(--bg-card);transition:all .12s;cursor:pointer}
 .task-type-btn.active{color:#fff;background:#3B82F6;border-color:#3B82F6}
 .task-type-btn.active[style*="F59E0B"]{background:#F59E0B;border-color:#F59E0B}
-.task-item-action{border-left:3px solid #3B82F6}
-.task-item-followup{border-left:3px solid #F59E0B;opacity:0.85}
 .subtask-list{margin-top:4px}
 .subtask-list .subtask-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
 .subtask-list .subtask-row input{flex:1;border:1px solid #E5E7EB;border-radius:6px;padding:5px 8px;font-size:13px}
@@ -3146,13 +3144,13 @@ function taskCardHtml(t, opts={}){
       </div>`;
   }
 
-  const typeClass = (t.taskType||'action') === 'follow-up' ? 'task-item-followup' : 'task-item-action';
-  return `<div class="task-card ${doneCls} ${typeClass}"
+  const typeIcon = (t.taskType||'action') === 'follow-up' ? `<span style="display:inline-block;margin-right:4px;font-size:11px">⏳</span>` : `<span style="display:inline-block;margin-right:4px;font-size:11px">📋</span>`;
+  return `<div class="task-card ${doneCls}"
     data-task="${t.id}" ${dragAttr}
     onclick="showTaskModal('${t.id}')">
     <div style="display:flex;align-items:flex-start;gap:8px">
       <div style="flex:1;min-width:0">
-        <div class="card-title ${t.done?'done-text':''}">${esc(t.title)}</div>
+        <div class="card-title ${t.done?'done-text':''}">${typeIcon}${esc(t.title)}</div>
         <div class="card-meta">
           ${opts.hideFlags ? '' : flagDots(t)}
           ${subProgress(t)}
@@ -3546,12 +3544,12 @@ function renderTable(){
         ${lucideIcon('sun','14')}
       </button>`;
 
-      const typeClass = (t.taskType||'action') === 'follow-up' ? 'task-item-followup' : 'task-item-action';
-      html += `<tr class="task-row-styled ${typeClass}" data-task-id="${t.id}">
+      const typeIcon = (t.taskType||'action') === 'follow-up' ? '⏳' : '📋';
+      html += `<tr class="task-row-styled" data-task-id="${t.id}">
         <td style="font-size:12px;color:${esc(a.color)};font-weight:500">${esc(a.name)}</td>
         <td style="font-size:12px;color:${esc(p.color)}">${esc(p.name)}</td>
         <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
-          <span style="font-size:13px;color:var(--tx);font-weight:400">${esc(t.title)}</span>
+          <span style="font-size:13px;color:var(--tx);font-weight:400">${typeIcon} ${esc(t.title)}</span>
         </td>
         <td style="text-align:center">${statusHtml}</td>
         <td style="text-align:center">${todayHtml}</td>
