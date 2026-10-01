@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.14.0">
+<meta name="version" content="2.15.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -710,8 +710,10 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .task-type-btn.active[style*="F59E0B"]{background:#F59E0B;border-color:#F59E0B}
 .task-card.action-type{background:rgba(59,130,246,0.06)}
 .task-card.followup-type{background:rgba(245,158,11,0.06)}
+.task-card.mgt-topic{border-left:3px solid #10B981 !important}
 .task-row-styled.action-type{background:rgba(59,130,246,0.04)}
 .task-row-styled.followup-type{background:rgba(245,158,11,0.04)}
+.task-row-styled.mgt-topic{border-left:3px solid #10B981;background:rgba(16,185,129,0.04)}
 .subtask-list{margin-top:4px}
 .subtask-list .subtask-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
 .subtask-list .subtask-row input{flex:1;border:1px solid #E5E7EB;border-radius:6px;padding:5px 8px;font-size:13px}
@@ -723,6 +725,7 @@ input,textarea,select{font-family:inherit;font-size:14px;color:var(--tx);backgro
 .flag-btn.on-today{background:#ECFDF5;border-color:var(--grn);color:var(--grn)}
 .flag-btn.on-hide{background:#FEE2E2;border-color:#EF4444;color:#DC2626}
 .flag-btn.on-snooze{background:#FEF3C7;border-color:#F59E0B;color:#D97706}
+.flag-btn.on-mgt-topic{background:#D1FAE5;border-color:#10B981;color:#059669}
 .flag-dot.flag-hidden{display:inline-block;width:4px;height:4px;border-radius:50%;background:#EF4444}
 .flag-dot.flag-snoozed{display:inline-block;width:4px;height:4px;border-radius:50%;background:#F59E0B}
 .subtask-item.subtask-hidden{opacity:.5;text-decoration:line-through}
@@ -1329,7 +1332,7 @@ const COLORS = ['#F59E0B','#EF4444','#8B5CF6','#3B82F6','#10B981','#EC4899','#63
 let state = {
   accounts: [], projects: [], tasks: [],
   view: 'kanban', selAcct: null, selProj: null,
-  flt: {u:false,f:false,t:false,taskType:'all'}, projectTab: 'tasks',
+  flt: {u:false,f:false,t:false,taskType:'all',mgtTopic:'all'}, projectTab: 'tasks',
   collapsed: {accounts: {}, projects: {}, tasks: {}, 'table-accts': {}, 'table-projs': {}, 'table-tasks': {}},
   budgetCurrency: 'USD',
   projectListColumns: {programNo: true, projectName: true, description: false, lnContractNo: true, devMgr: false, sysEng: false, salesMgr: false, qaMgr: false, ilsMgr: false, progress: true, budget: true}
@@ -2743,6 +2746,7 @@ function renderSidebar(){
   ];
   const flagItems = [
     {id:'today',label:'Today',icon:'sun',count:bc.today,flag:'t',color:'var(--gn)'},
+    {id:'mgt-topics',label:'Mgt Topics',icon:'briefcase',count:countMgtTopics(),flag:'mgtTopic',color:'#10B981'},
   ];
 
   const viewsHtml = viewItems.map(v=>{
@@ -2760,7 +2764,12 @@ function renderSidebar(){
   }).join('');
 
   const flagsHtml = flagItems.map(f=>{
-    const active = state.flt[f.flag] ? 'active' : '';
+    let active = '';
+    if(f.flag === 'mgtTopic') {
+      active = state.flt.mgtTopic === 'only' ? 'active' : '';
+    } else {
+      active = state.flt[f.flag] ? 'active' : '';
+    }
     const badge = f.count ? `<span class="sb-badge">${f.count}</span>` : '';
     return `<div class="sidebar-item ${active}" data-sidebar-flag="${f.flag}" style="${active?`--sidebar-active:${f.color}20;color:${f.color}`:''}"">
       ${lucideIcon(f.icon,'18')} <span>${f.label}</span>${badge}
@@ -3157,7 +3166,8 @@ function taskCardHtml(t, opts={}){
   }
 
   const typeClass = (t.taskType||'action') === 'follow-up' ? 'followup-type' : 'action-type';
-  return `<div class="task-card ${doneCls} ${typeClass}"
+  const mgtClass = t.mgtTopic ? 'mgt-topic' : '';
+  return `<div class="task-card ${doneCls} ${typeClass} ${mgtClass}"
     data-task="${t.id}" ${dragAttr}
     onclick="showTaskModal('${t.id}')">
     <div style="display:flex;align-items:flex-start;gap:8px">
@@ -3215,6 +3225,8 @@ function filterTasks(tasks){
   // Filter by task type (action vs follow-up)
   if(state.flt.taskType === 'action') res = res.filter(t=>(t.taskType||'action') !== 'follow-up');
   if(state.flt.taskType === 'follow-up') res = res.filter(t=>(t.taskType||'action') === 'follow-up');
+  // Filter by mgt topic
+  if(state.flt.mgtTopic === 'only') res = res.filter(t=>t.mgtTopic);
   return res;
 }
 
@@ -3233,14 +3245,27 @@ function countTasksByType(type){
   }).length;
 }
 
+function setMgtTopicFilter(val){
+  state.flt.mgtTopic = val;
+  sv();
+  render();
+}
+
+function countMgtTopics(){
+  return state.tasks.filter(t=>{
+    if(t.hidden || t.done || t.snoozedAt) return false;
+    return t.mgtTopic;
+  }).length;
+}
+
 function getActiveBanner(){
   if(state.view==='today') return `<div class="filter-banner banner-today">${lucideIcon('sun','20')} Today</div>`;
   return '';
 }
 
 function getFlagFilterBar(){
-  const {t, taskType} = state.flt;
-  const hasFilters = t || taskType !== 'all';
+  const {t, taskType, mgtTopic} = state.flt;
+  const hasFilters = t || taskType !== 'all' || mgtTopic !== 'all';
 
   return `<div style="display:flex;gap:8px;padding:10px 16px;align-items:center;background:#f9fafb;border-bottom:1px solid var(--silver2);flex-wrap:wrap">
     <span style="font-weight:600;font-size:13px;color:var(--t2)">Filter:</span>
@@ -3257,6 +3282,13 @@ function getFlagFilterBar(){
     <button class="flag-filter-btn ${taskType==='all' ? 'active' : ''}" onclick="setTaskTypeFilter('all')" title="Show all task types">
       All Types
     </button>
+    <div style="width:1px;height:20px;background:var(--silver2);margin:0 4px"></div>
+    <button class="flag-filter-btn ${mgtTopic==='only' ? 'active' : ''}" onclick="setMgtTopicFilter('only')" title="Show management topics only">
+      ${lucideIcon('briefcase','14')} Mgt Topics
+    </button>
+    <button class="flag-filter-btn ${mgtTopic==='all' ? 'active' : ''}" onclick="setMgtTopicFilter('all')" title="Show all tasks">
+      All
+    </button>
     ${hasFilters ? `<div style="width:1px;height:20px;background:var(--silver2);margin:0 4px"></div><button class="flag-filter-btn clear-btn" onclick="clearAllFlags()" title="Clear all active flags">
       ${lucideIcon('x','14')} Clear Filters
     </button>` : ''}
@@ -3268,7 +3300,7 @@ function renderKanban(){
   if(state.selAcct) accounts = accounts.filter(a=>a.id===state.selAcct);
 
   // Check if filter chips are active
-  const hasFilters = state.flt.t || state.flt.s || state.flt.taskType !== 'all';
+  const hasFilters = state.flt.t || state.flt.s || state.flt.taskType !== 'all' || state.flt.mgtTopic !== 'all';
   const curView = state.view;
   const td = todayStr();
 
@@ -3564,7 +3596,8 @@ function renderTable(){
       </button>`;
 
       const typeClass = (t.taskType||'action') === 'follow-up' ? 'followup-type' : 'action-type';
-      html += `<tr class="task-row-styled ${typeClass}" data-task-id="${t.id}">
+      const mgtClass = t.mgtTopic ? 'mgt-topic' : '';
+      html += `<tr class="task-row-styled ${typeClass} ${mgtClass}" data-task-id="${t.id}">
         <td style="font-size:12px;color:${esc(a.color)};font-weight:500">${esc(a.name)}</td>
         <td style="font-size:12px;color:${esc(p.color)}">${esc(p.name)}</td>
         <td style="cursor:pointer" onclick="showTaskModal('${t.id}')" title="${esc(t.title)}">
@@ -6355,6 +6388,7 @@ function showTaskModal(id, defaults){
       <label class="form-label">Flags</label>
       <div class="toggle-row">
         <button class="toggle-btn ${(t?.today||data.today)?'on-today':''}" id="t-today" onclick="this.classList.toggle('on-today')">${lucideIcon('sun','16')} Today</button>
+        <button class="toggle-btn ${(t?.mgtTopic||data.mgtTopic)?'on-mgt-topic':''}" id="t-mgt-topic" onclick="this.classList.toggle('on-mgt-topic')">${lucideIcon('briefcase','16')} Mgt Topic</button>
       </div>
     </div>
     <div class="form-group">
@@ -6427,6 +6461,7 @@ function saveTask(id){
   const recurring = document.getElementById('t-rec').value||null;
   const taskType = document.getElementById('t-type-followup').classList.contains('active')?'follow-up':'action';
   const today = document.getElementById('t-today').classList.contains('on-today');
+  const mgtTopic = document.getElementById('t-mgt-topic').classList.contains('on-mgt-topic');
   const done = document.getElementById('t-complete').classList.contains('checked');
   const hidden = document.getElementById('t-hidden').classList.contains('hidden');
   const snoozed = document.getElementById('t-snoozed').classList.contains('snoozed');
@@ -6449,12 +6484,12 @@ function saveTask(id){
     history.push(`Update task: ${taskById(id)?.title || id}`, state);
     t = taskById(id);
     const snoozedAt = snoozed ? (t.snoozedAt||now) : null;
-    Object.assign(t,{title,projectId,recurring,taskType,today,done,hidden,snoozedAt,notes,subs,updated:now});
+    Object.assign(t,{title,projectId,recurring,taskType,today,mgtTopic,done,hidden,snoozedAt,notes,subs,updated:now});
   } else {
     history.push(`Create task: ${title}`, state);
     const tasksInProj = state.tasks.filter(x=>x.projectId===projectId&&!x.done).length;
     const snoozedAt = snoozed ? now : null;
-    t = {id:uid(),title,projectId,recurring,taskType,today,hidden,snoozedAt,notes,subs,done:done||false,order:tasksInProj,createdAt:new Date().toISOString(),updated:now};
+    t = {id:uid(),title,projectId,recurring,taskType,today,mgtTopic,hidden,snoozedAt,notes,subs,done:done||false,order:tasksInProj,createdAt:new Date().toISOString(),updated:now};
     state.tasks.push(t);
   }
   sv();
@@ -8948,6 +8983,8 @@ window.parseDateDDMMYY = parseDateDDMMYY;
 window.selectTaskType = selectTaskType;
 window.setTaskTypeFilter = setTaskTypeFilter;
 window.countTasksByType = countTasksByType;
+window.setMgtTopicFilter = setMgtTopicFilter;
+window.countMgtTopics = countMgtTopics;
 
 // Global export function
 function exportCurrentView() {
