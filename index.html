@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>TaskHive</title>
-<meta name="version" content="2.15.0">
+<meta name="version" content="2.16.0">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
@@ -3258,6 +3258,24 @@ function countMgtTopics(){
   }).length;
 }
 
+function clearAllTodayTasks(){
+  const todayTasks = state.tasks.filter(t=>t.today && !t.done && !t.hidden && !t.snoozedAt);
+  if(todayTasks.length === 0){
+    toast('No today tasks to clear');
+    return;
+  }
+  if(!confirm(`Unmark ${todayTasks.length} task${todayTasks.length !== 1 ? 's' : ''} from Today?`)) return;
+  history.push(`Clear all today tasks (${todayTasks.length})`, state);
+  todayTasks.forEach(t=>{
+    t.today = false;
+    t.updated = Date.now();
+    syncTaskToFirebase(t);
+  });
+  sv();
+  render();
+  toast(`Cleared ${todayTasks.length} today task${todayTasks.length !== 1 ? 's' : ''}`);
+}
+
 function getActiveBanner(){
   if(state.view==='today') return `<div class="filter-banner banner-today">${lucideIcon('sun','20')} Today</div>`;
   return '';
@@ -3266,12 +3284,18 @@ function getActiveBanner(){
 function getFlagFilterBar(){
   const {t, taskType, mgtTopic} = state.flt;
   const hasFilters = t || taskType !== 'all' || mgtTopic !== 'all';
+  const todayCount = state.tasks.filter(t => t.today && !t.done && !t.hidden && !t.snoozedAt).length;
 
   return `<div style="display:flex;gap:8px;padding:10px 16px;align-items:center;background:#f9fafb;border-bottom:1px solid var(--silver2);flex-wrap:wrap">
     <span style="font-weight:600;font-size:13px;color:var(--t2)">Filter:</span>
-    <button class="flag-filter-btn ${t ? 'active' : ''}" onclick="state.flt.t=!state.flt.t;sv();render()" title="Toggle Today filter">
-      ${lucideIcon('sun','14')} Today
-    </button>
+    <div style="display:flex;align-items:center;gap:4px">
+      <button class="flag-filter-btn ${t ? 'active' : ''}" onclick="state.flt.t=!state.flt.t;sv();render()" title="Toggle Today filter">
+        ${lucideIcon('sun','14')} Today
+      </button>
+      ${todayCount > 0 ? `<button class="flag-filter-btn clear-btn" onclick="clearAllTodayTasks()" title="Clear all today tasks" style="padding:4px 8px;font-size:11px">
+        ${lucideIcon('x','12')} Clear All (${todayCount})
+      </button>` : ''}
+    </div>
     <div style="width:1px;height:20px;background:var(--silver2);margin:0 4px"></div>
     <button class="flag-filter-btn ${taskType==='action' ? 'active' : ''}" onclick="setTaskTypeFilter('action')" title="Show action tasks only">
       ${lucideIcon('clipboard-list','14')} Actions
@@ -8985,6 +9009,7 @@ window.setTaskTypeFilter = setTaskTypeFilter;
 window.countTasksByType = countTasksByType;
 window.setMgtTopicFilter = setMgtTopicFilter;
 window.countMgtTopics = countMgtTopics;
+window.clearAllTodayTasks = clearAllTodayTasks;
 
 // Global export function
 function exportCurrentView() {
